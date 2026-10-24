@@ -1,0 +1,73 @@
+{
+  "source": "synthetic",
+  "profiles": [
+    {
+      "customer_id": "p1",
+      "name": "Maya Lopez",
+      "tagline": "College senior · Corolla lease ending · over on miles",
+      "goals": ["keep_a_car_after_graduation"],
+      "miles_per_year": 11700,
+      "vehicle_targets": ["corolla_le_2027"],
+      "vehicle": {
+        "model_id": "corolla_le_2023",
+        "mileage": 31200,
+        "est_value": 18900
+      },
+      "contract": {
+        "type": "lease",
+        "cap_cost": 22500,
+        "residual": 14600,
+        "money_factor": 0.00175,
+        "term_months": 36,
+        "months_elapsed": 32,
+        "months_remaining": 4,
+        "monthly_payment": 284.37,
+        "miles_allowed_total": 30000
+      }
+    },
+    {
+      "customer_id": "p2",
+      "name": "The Reyes family",
+      "tagline": "Expecting a baby · financed RAV4",
+      "goals": ["keep_payments_predictable"],
+      "miles_per_year": 13000,
+      "vehicle_targets": ["highlander_xle_2027"],
+      "vehicle": {
+        "model_id": "rav4_xle_2022",
+        "mileage": 41000,
+        "est_value": 24000
+      },
+      "contract": {
+        "type": "loan",
+        "principal": 30000,
+        "apr": 4.9,
+        "term_months": 60,
+        "payments_made": 22,
+        "months_remaining": 38,
+        "monthly_payment": 564.76
+      }
+    },
+    {
+      "customer_id": "p3",
+      "name": "Daniel Kim",
+      "tagline": "Positive equity · high-APR Camry loan",
+      "goals": ["newer_vehicle", "lower_fuel_cost"],
+      "miles_per_year": 12000,
+      "vehicle_targets": ["camry_hybrid_se_2027"],
+      "vehicle": {
+        "model_id": "camry_se_2021",
+        "mileage": 48000,
+        "est_value": 21000
+      },
+      "contract": {
+        "type": "loan",
+        "principal": 22000,
+        "apr": 9.9,
+        "term_months": 72,
+        "payments_made": 36,
+        "months_remaining": 36,
+        "monthly_payment": 406.46
+      }
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "source": "synthetic",
+  "vehicles": {
+    "corolla_le_2023": {
+      "label": "2023 Corolla LE",
+      "year": 2023,
+      "model": "Corolla",
+      "trim": "LE",
+      "msrp": null,
+      "mpg": 35,
+      "lease_residual_pct": null
+    },
+    "rav4_xle_2022": {
+      "label": "2022 RAV4 XLE",
+      "year": 2022,
+      "model": "RAV4",
+      "trim": "XLE",
+      "msrp": null,
+      "mpg": 30,
+      "lease_residual_pct": null
+    },
+    "camry_se_2021": {
+      "label": "2021 Camry SE",
+      "year": 2021,
+      "model": "Camry",
+      "trim": "SE",
+      "msrp": null,
+      "mpg": 32,
+      "lease_residual_pct": null
+    },
+    "corolla_le_2027": {
+      "label": "2027 Corolla LE",
+      "year": 2027,
+      "model": "Corolla",
+      "trim": "LE",
+      "msrp": 23500,
+      "mpg": 35,
+      "lease_residual_pct": 0.62
+    },
+    "highlander_xle_2027": {
+      "label": "2027 Highlander XLE",
+      "year": 2027,
+      "model": "Highlander",
+      "trim": "XLE",
+      "msrp": 45500,
+      "mpg": 25,
+      "lease_residual_pct": 0.58
+    },
+    "camry_hybrid_se_2027": {
+      "label": "2027 Camry Hybrid SE",
+      "year": 2027,
+      "model": "Camry Hybrid",
+      "trim": "SE",
+      "msrp": 32500,
+      "mpg": 51,
+      "lease_residual_pct": 0.60
+    }
+  }
+}
