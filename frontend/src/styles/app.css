@@ -124,15 +124,137 @@ a { color: inherit; }
   background: var(--color-white);
 }
 
-/* Recommendations placeholder (NM-10) */
+/* Recommendations */
 .section { margin-top: var(--space-4); }
 .section h2 { margin: 0 0 var(--space-2); font-size: 20px; }
-.placeholder {
-  border: 2px dashed var(--color-border);
+
+.rec-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+.rec-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+/* #1 spans the row, with numbers on the left and the why + action on the right */
+.rec-card-top {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: var(--space-4);
+  border: 2px solid var(--color-red);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+@media (max-width: 900px) {
+  .rec-list { grid-template-columns: 1fr; }
+  .rec-card-top { grid-template-columns: 1fr; gap: var(--space-2); }
+}
+
+.ribbon {
+  position: absolute;
+  top: 0;
+  right: var(--space-3);
+  padding: 4px var(--space-2);
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: var(--color-red);
+  color: var(--color-white);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rec-head { display: flex; gap: var(--space-1); margin-bottom: var(--space-1); }
+.badge-offer { background: var(--color-white); color: var(--color-ink); border: 1px solid var(--color-ink); }
+.rec-title { margin: 0; font-size: 20px; }
+.rec-card-top .rec-title { font-size: 24px; }
+.rec-vehicle { margin: 4px 0 var(--space-2); font-size: 14px; }
+
+.rec-price { margin: 0; font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.rec-card-top .rec-price { font-size: 40px; }
+.rec-per { font-size: 16px; font-weight: 600; color: var(--color-muted); }
+.rec-delta {
+  display: inline-block;
+  margin: 4px 0 var(--space-2);
+  padding: 2px var(--space-1);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.delta-good { background: var(--color-positive-bg); color: var(--color-positive); }
+.delta-warn { background: var(--color-warning-bg); color: var(--color-warning); }
+.rec-stats { padding-top: var(--space-1); border-top: 1px solid var(--color-border); }
+
+.rec-body { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; }
+.rec-explanation { margin: 0; line-height: 1.5; }
+.rec-tradeoffs { margin: 0; padding-left: var(--space-3); color: var(--color-muted); line-height: 1.5; }
+.rec-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: auto;
+}
+
+/* Buttons */
+.btn {
+  padding: 12px var(--space-3);
+  border: 2px solid transparent;
   border-radius: var(--radius);
-  padding: var(--space-4);
-  text-align: center;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn:hover { opacity: 0.85; }
+.btn-primary { background: var(--color-red); color: var(--color-white); }
+.btn-dark { background: var(--color-ink); color: var(--color-white); }
+.btn-outline { background: transparent; color: var(--color-ink); border-color: var(--color-ink); }
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
   color: var(--color-muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-button:hover { color: var(--color-red); }
+
+.considered-note {
+  display: inline-block;
+  margin-top: var(--space-2);
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-4);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: calc(100% - var(--space-4));
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  background: var(--color-ink);
+  color: var(--color-white);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+.toast-close {
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
 }
 
 /* Persona picker */

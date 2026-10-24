@@ -6,6 +6,7 @@ import ContractCard from '../components/ContractCard.jsx'
 import EquityBadge from '../components/EquityBadge.jsx'
 import EquityChart from '../components/EquityChart.jsx'
 import FinanceSnapshot from '../components/FinanceSnapshot.jsx'
+import RecommendationList from '../components/RecommendationList.jsx'
 import VehicleCard from '../components/VehicleCard.jsx'
 import WhatIfPanel from '../components/WhatIfPanel.jsx'
 
@@ -66,9 +67,11 @@ export default function Dashboard() {
       <section className="section">
         <h2>Your next move</h2>
         <WhatIfPanel value={lifeEvent} onChange={setLifeEvent} summary={recs.data.life_event_applied} />
-        {/* NM-10: recommendation cards go here */}
-        <div className="placeholder">Recommendations coming soon</div>
-        <ComparisonTable considered={recs.data.considered} />
+        <RecommendationList recommendations={recs.data.recommendations} considered={recs.data.considered} />
+        {/* Anchor for the "We also considered N other options" link */}
+        <div id="all-options">
+          <ComparisonTable considered={recs.data.considered} />
+        </div>
         <EquityChart timeline={equity_timeline} contractType={contract.type} />
       </section>
     </main>

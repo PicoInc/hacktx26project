@@ -10,6 +10,8 @@
   --color-positive-bg: #E6F4EA;
   --color-negative: var(--color-red);
   --color-negative-bg: #FDE7E9;
+  --color-warning: #B26A00;
+  --color-warning-bg: #FFF4E5;
 
   /* 8px spacing grid */
   --space-1: 8px;
