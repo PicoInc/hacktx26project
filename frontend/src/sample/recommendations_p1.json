@@ -1,0 +1,225 @@
+{
+  "recommendations": [
+    {
+      "id": "lease_buyout",
+      "rank": 1,
+      "previous_rank": null,
+      "title": "Buy out your Corolla",
+      "vehicle_label": "2023 Corolla LE",
+      "keeps_vehicle": true,
+      "monthly_payment": 294.34,
+      "delta_monthly": 9.97,
+      "upfront_cost": 0,
+      "term_months": 60,
+      "total_cost": 17660.4,
+      "fuel_monthly": 83.57,
+      "effective_monthly": 377.91,
+      "equity_used": 0,
+      "affordable": true,
+      "rejection_reason": null,
+      "tradeoffs": [
+        "Avoids the $1,275 over-mileage fee",
+        "You own the car; repairs after warranty are on you"
+      ],
+      "assumptions": {
+        "apr": 6.9,
+        "term_months": 60,
+        "residual": 14600,
+        "fees": 300,
+        "source": "synthetic"
+      },
+      "action": {
+        "kind": "self_service",
+        "label": "Start buyout"
+      },
+      "explanation": "Buying out your Corolla keeps your payment close to today's at $294.34/mo and avoids the $1,275 over-mileage fee. The trade-off is that repairs after the warranty are on you. You can start the buyout online.",
+      "explanation_source": "template"
+    },
+    {
+      "id": "buy_miles_new_lease",
+      "rank": 2,
+      "previous_rank": null,
+      "title": "Prepay your extra miles and lease a 2027 Corolla",
+      "vehicle_label": "2027 Corolla LE",
+      "keeps_vehicle": true,
+      "monthly_payment": 324.2,
+      "delta_monthly": 39.83,
+      "upfront_cost": 1160,
+      "term_months": 36,
+      "total_cost": 12831.2,
+      "fuel_monthly": 83.57,
+      "effective_monthly": 504.44,
+      "equity_used": 0,
+      "affordable": true,
+      "rejection_reason": null,
+      "tradeoffs": [
+        "Prepaid miles cost $765 instead of a $1,275 fee",
+        "$1,160 due upfront"
+      ],
+      "assumptions": {
+        "money_factor": 0.002,
+        "term_months": 36,
+        "prepaid_miles_rate": 0.15,
+        "disposition_fee": 395,
+        "source": "synthetic"
+      },
+      "action": {
+        "kind": "offer",
+        "label": "See lease offer"
+      },
+      "explanation": "You'd drive a new 2027 Corolla for $324.20/mo after paying $1,160 upfront for your extra miles and the return fee. That upfront cost is the main trade-off. You can see the lease offer now.",
+      "explanation_source": "template"
+    },
+    {
+      "id": "return_walk_away",
+      "rank": 3,
+      "previous_rank": null,
+      "title": "Return the car and walk away",
+      "vehicle_label": "2023 Corolla LE",
+      "keeps_vehicle": false,
+      "monthly_payment": 0,
+      "delta_monthly": -284.37,
+      "upfront_cost": 1670,
+      "term_months": 0,
+      "total_cost": 1670,
+      "fuel_monthly": 0,
+      "effective_monthly": 139.17,
+      "equity_used": 0,
+      "affordable": true,
+      "rejection_reason": null,
+      "tradeoffs": [
+        "No car payment",
+        "You'd lose about $4,300 in equity and need another way to get around"
+      ],
+      "assumptions": {
+        "overage_rate": 0.25,
+        "disposition_fee": 395,
+        "source": "synthetic"
+      },
+      "action": {
+        "kind": "follow_up",
+        "label": "Talk to a TFS specialist"
+      },
+      "explanation": "Returning the car ends your $284.37 payment but costs $1,670 in fees and leaves you without a car. A specialist can walk you through it.",
+      "explanation_source": "template"
+    }
+  ],
+  "considered": [
+    {
+      "id": "lease_buyout",
+      "rank": 1,
+      "previous_rank": null,
+      "title": "Buy out your Corolla",
+      "vehicle_label": "2023 Corolla LE",
+      "keeps_vehicle": true,
+      "monthly_payment": 294.34,
+      "delta_monthly": 9.97,
+      "upfront_cost": 0,
+      "term_months": 60,
+      "total_cost": 17660.4,
+      "fuel_monthly": 83.57,
+      "effective_monthly": 377.91,
+      "equity_used": 0,
+      "affordable": true,
+      "rejection_reason": null,
+      "tradeoffs": [
+        "Avoids the $1,275 over-mileage fee",
+        "You own the car; repairs after warranty are on you"
+      ],
+      "assumptions": {
+        "apr": 6.9,
+        "term_months": 60,
+        "residual": 14600,
+        "fees": 300,
+        "source": "synthetic"
+      },
+      "action": {
+        "kind": "self_service",
+        "label": "Start buyout"
+      },
+      "explanation": "Buying out your Corolla keeps your payment close to today's at $294.34/mo and avoids the $1,275 over-mileage fee. The trade-off is that repairs after the warranty are on you. You can start the buyout online.",
+      "explanation_source": "template"
+    },
+    {
+      "id": "buy_miles_new_lease",
+      "rank": 2,
+      "previous_rank": null,
+      "title": "Prepay your extra miles and lease a 2027 Corolla",
+      "vehicle_label": "2027 Corolla LE",
+      "keeps_vehicle": true,
+      "monthly_payment": 324.2,
+      "delta_monthly": 39.83,
+      "upfront_cost": 1160,
+      "term_months": 36,
+      "total_cost": 12831.2,
+      "fuel_monthly": 83.57,
+      "effective_monthly": 504.44,
+      "equity_used": 0,
+      "affordable": true,
+      "rejection_reason": null,
+      "tradeoffs": [
+        "Prepaid miles cost $765 instead of a $1,275 fee",
+        "$1,160 due upfront"
+      ],
+      "assumptions": {
+        "money_factor": 0.002,
+        "term_months": 36,
+        "prepaid_miles_rate": 0.15,
+        "disposition_fee": 395,
+        "source": "synthetic"
+      },
+      "action": {
+        "kind": "offer",
+        "label": "See lease offer"
+      },
+      "explanation": "You'd drive a new 2027 Corolla for $324.20/mo after paying $1,160 upfront for your extra miles and the return fee. That upfront cost is the main trade-off. You can see the lease offer now.",
+      "explanation_source": "template"
+    },
+    {
+      "id": "return_walk_away",
+      "rank": 3,
+      "previous_rank": null,
+      "title": "Return the car and walk away",
+      "vehicle_label": "2023 Corolla LE",
+      "keeps_vehicle": false,
+      "monthly_payment": 0,
+      "delta_monthly": -284.37,
+      "upfront_cost": 1670,
+      "term_months": 0,
+      "total_cost": 1670,
+      "fuel_monthly": 0,
+      "effective_monthly": 139.17,
+      "equity_used": 0,
+      "affordable": true,
+      "rejection_reason": null,
+      "tradeoffs": [
+        "No car payment",
+        "You'd lose about $4,300 in equity and need another way to get around"
+      ],
+      "assumptions": {
+        "overage_rate": 0.25,
+        "disposition_fee": 395,
+        "source": "synthetic"
+      },
+      "action": {
+        "kind": "follow_up",
+        "label": "Talk to a TFS specialist"
+      },
+      "explanation": "Returning the car ends your $284.37 payment but costs $1,670 in fees and leaves you without a car. A specialist can walk you through it.",
+      "explanation_source": "template"
+    },
+    {
+      "id": "return_new_lease",
+      "title": "Return the car and lease a 2027 Corolla",
+      "monthly_payment": 324.2,
+      "delta_monthly": 39.83,
+      "upfront_cost": 1670,
+      "total_cost": 13341.2,
+      "affordable": false,
+      "rejection_reason": "Upfront cost of $1,670 would leave less than one month of bills in savings"
+    }
+  ],
+  "relief_needed": false,
+  "life_event_applied": null,
+  "finances_after_event": null
+}
