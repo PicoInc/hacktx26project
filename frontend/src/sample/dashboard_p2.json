@@ -1,0 +1,41 @@
+{
+  "customer": {
+    "id": "p2",
+    "name": "The Reyes family"
+  },
+  "goals": [
+    "keep_payments_predictable"
+  ],
+  "vehicle": {
+    "year": 2022,
+    "model": "RAV4",
+    "trim": "XLE",
+    "mileage": 41000,
+    "est_value": 24000
+  },
+  "contract": {
+    "type": "loan",
+    "monthly_payment": 564.76,
+    "months_remaining": 38,
+    "months_elapsed": 22,
+    "apr": 4.9,
+    "residual": null,
+    "payoff": 19841,
+    "miles_allowed_total": null,
+    "miles_projected_at_end": null
+  },
+  "finances": {
+    "monthly_income": 6200,
+    "monthly_bills": 3600,
+    "monthly_spending": 1700,
+    "monthly_surplus": 900,
+    "savings": 9000,
+    "checking": 2100,
+    "source": "mock"
+  },
+  "equity": {
+    "value": 4159,
+    "status": "positive"
+  },
+  "equity_timeline": []
+}

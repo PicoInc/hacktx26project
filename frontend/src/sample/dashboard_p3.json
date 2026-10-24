@@ -1,0 +1,42 @@
+{
+  "customer": {
+    "id": "p3",
+    "name": "Daniel Kim"
+  },
+  "goals": [
+    "newer_vehicle",
+    "lower_fuel_cost"
+  ],
+  "vehicle": {
+    "year": 2021,
+    "model": "Camry",
+    "trim": "SE",
+    "mileage": 48000,
+    "est_value": 21000
+  },
+  "contract": {
+    "type": "loan",
+    "monthly_payment": 406.46,
+    "months_remaining": 36,
+    "months_elapsed": 36,
+    "apr": 9.9,
+    "residual": null,
+    "payoff": 12615,
+    "miles_allowed_total": null,
+    "miles_projected_at_end": null
+  },
+  "finances": {
+    "monthly_income": 6500,
+    "monthly_bills": 2800,
+    "monthly_spending": 1500,
+    "monthly_surplus": 2200,
+    "savings": 15000,
+    "checking": 3400,
+    "source": "mock"
+  },
+  "equity": {
+    "value": 8385,
+    "status": "positive"
+  },
+  "equity_timeline": []
+}
