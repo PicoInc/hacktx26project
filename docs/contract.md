@@ -22,8 +22,9 @@ Full samples for persona p1 live in `docs/sample_responses/`. Exact persona numb
 Body: `{ "life_event": null }` or `{ "life_event": { "type": "new_baby" | "income_drop" | "longer_commute", "params": {} } }`
 
 Response: `{ recommendations, considered, relief_needed, life_event_applied, finances_after_event }`
-- `recommendations`: top 3, each with `id, rank, previous_rank, title, vehicle_label, keeps_vehicle, monthly_payment, delta_monthly, upfront_cost, term_months, total_cost, fuel_monthly, effective_monthly, equity_used, affordable, rejection_reason, tradeoffs[], assumptions{}, action{kind,label}, explanation, explanation_source`
+- `recommendations`: top 3, each with `id, rank, previous_rank, title, vehicle_label, keeps_vehicle, monthly_payment, delta_monthly, upfront_cost, term_months, total_cost, fuel_monthly, effective_monthly, equity_used, affordable, rejection_reason, tradeoffs[], assumptions{}, action{kind,label,confirmation}, explanation, explanation_source`
 - `action.kind`: `"self_service" | "follow_up" | "offer"`
+- `action.confirmation`: one customer-facing sentence shown in a toast after the button is clicked ("Buyout started — a TFS specialist will confirm within 1 business day")
 - `considered`: every option evaluated, including rejected ones with `rejection_reason`
 - `life_event_applied`: `null` or a one-line summary string
 - `finances_after_event`: `null` or a `finances` object after the event
