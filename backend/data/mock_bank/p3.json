@@ -1,0 +1,276 @@
+{
+  "source": "synthetic",
+  "customer": {
+    "_id": "p3",
+    "first_name": "Daniel",
+    "last_name": "Kim"
+  },
+  "accounts": [
+    {
+      "_id": "p3-checking",
+      "type": "Checking",
+      "balance": 3400
+    },
+    {
+      "_id": "p3-savings",
+      "type": "Savings",
+      "balance": 15000
+    }
+  ],
+  "deposits": [
+    {
+      "amount": 3250.0,
+      "transaction_date": "2026-07-31",
+      "description": "Payroll"
+    },
+    {
+      "amount": 3250.0,
+      "transaction_date": "2026-08-14",
+      "description": "Payroll"
+    },
+    {
+      "amount": 3250.0,
+      "transaction_date": "2026-08-28",
+      "description": "Payroll"
+    },
+    {
+      "amount": 3250.0,
+      "transaction_date": "2026-09-11",
+      "description": "Payroll"
+    },
+    {
+      "amount": 3250.0,
+      "transaction_date": "2026-09-25",
+      "description": "Payroll"
+    },
+    {
+      "amount": 3250.0,
+      "transaction_date": "2026-10-09",
+      "description": "Payroll"
+    }
+  ],
+  "purchases": [
+    {
+      "amount": 153.12,
+      "purchase_date": "2026-07-24",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 52.61,
+      "purchase_date": "2026-07-25",
+      "description": "CVS"
+    },
+    {
+      "amount": 171.37,
+      "purchase_date": "2026-07-28",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 218.85,
+      "purchase_date": "2026-07-28",
+      "description": "Chipotle"
+    },
+    {
+      "amount": 231.58,
+      "purchase_date": "2026-07-29",
+      "description": "Amazon"
+    },
+    {
+      "amount": 125.42,
+      "purchase_date": "2026-07-30",
+      "description": "Spotify"
+    },
+    {
+      "amount": 93.88,
+      "purchase_date": "2026-08-02",
+      "description": "H-E-B"
+    },
+    {
+      "amount": 50.03,
+      "purchase_date": "2026-08-03",
+      "description": "Spotify"
+    },
+    {
+      "amount": 178.25,
+      "purchase_date": "2026-08-04",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 217.63,
+      "purchase_date": "2026-08-05",
+      "description": "Amazon"
+    },
+    {
+      "amount": 101.6,
+      "purchase_date": "2026-08-10",
+      "description": "Spotify"
+    },
+    {
+      "amount": 60.01,
+      "purchase_date": "2026-08-12",
+      "description": "Target"
+    },
+    {
+      "amount": 82.01,
+      "purchase_date": "2026-08-15",
+      "description": "Amazon"
+    },
+    {
+      "amount": 174.92,
+      "purchase_date": "2026-08-15",
+      "description": "CVS"
+    },
+    {
+      "amount": 120.42,
+      "purchase_date": "2026-08-17",
+      "description": "Target"
+    },
+    {
+      "amount": 53.44,
+      "purchase_date": "2026-08-21",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 103.57,
+      "purchase_date": "2026-08-21",
+      "description": "Shell"
+    },
+    {
+      "amount": 79.43,
+      "purchase_date": "2026-08-23",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 21.1,
+      "purchase_date": "2026-08-29",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 252.98,
+      "purchase_date": "2026-08-31",
+      "description": "H-E-B"
+    },
+    {
+      "amount": 11.89,
+      "purchase_date": "2026-09-01",
+      "description": "Chipotle"
+    },
+    {
+      "amount": 33.84,
+      "purchase_date": "2026-09-02",
+      "description": "CVS"
+    },
+    {
+      "amount": 256.61,
+      "purchase_date": "2026-09-09",
+      "description": "CVS"
+    },
+    {
+      "amount": 120.21,
+      "purchase_date": "2026-09-11",
+      "description": "Walmart"
+    },
+    {
+      "amount": 86.86,
+      "purchase_date": "2026-09-19",
+      "description": "Spotify"
+    },
+    {
+      "amount": 211.93,
+      "purchase_date": "2026-09-20",
+      "description": "Target"
+    },
+    {
+      "amount": 74.69,
+      "purchase_date": "2026-10-01",
+      "description": "Amazon"
+    },
+    {
+      "amount": 175.1,
+      "purchase_date": "2026-10-01",
+      "description": "H-E-B"
+    },
+    {
+      "amount": 11.68,
+      "purchase_date": "2026-10-02",
+      "description": "Torchy's Tacos"
+    },
+    {
+      "amount": 185.65,
+      "purchase_date": "2026-10-02",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 251.8,
+      "purchase_date": "2026-10-09",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 97.81,
+      "purchase_date": "2026-10-09",
+      "description": "Amazon"
+    },
+    {
+      "amount": 27.61,
+      "purchase_date": "2026-10-10",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 264.33,
+      "purchase_date": "2026-10-12",
+      "description": "Chipotle"
+    },
+    {
+      "amount": 147.77,
+      "purchase_date": "2026-10-19",
+      "description": "Torchy's Tacos"
+    }
+  ],
+  "bills": [
+    {
+      "payment_amount": 1700,
+      "payee": "Rent",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 406.46,
+      "payee": "Toyota Financial Services",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 180,
+      "payee": "Car insurance",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 160,
+      "payee": "Utilities",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 90,
+      "payee": "Phone",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 70,
+      "payee": "Internet",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 45,
+      "payee": "Gym",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 30,
+      "payee": "Streaming",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 120,
+      "payee": "Student loan",
+      "status": "recurring"
+    }
+  ]
+}
