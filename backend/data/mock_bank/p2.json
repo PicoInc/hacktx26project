@@ -1,0 +1,291 @@
+{
+  "source": "synthetic",
+  "customer": {
+    "_id": "p2",
+    "first_name": "Elena",
+    "last_name": "Reyes"
+  },
+  "accounts": [
+    {
+      "_id": "p2-checking",
+      "type": "Checking",
+      "balance": 2100
+    },
+    {
+      "_id": "p2-savings",
+      "type": "Savings",
+      "balance": 9000
+    }
+  ],
+  "deposits": [
+    {
+      "amount": 3100.0,
+      "transaction_date": "2026-07-31",
+      "description": "Payroll"
+    },
+    {
+      "amount": 3100.0,
+      "transaction_date": "2026-08-14",
+      "description": "Payroll"
+    },
+    {
+      "amount": 3100.0,
+      "transaction_date": "2026-08-28",
+      "description": "Payroll"
+    },
+    {
+      "amount": 3100.0,
+      "transaction_date": "2026-09-11",
+      "description": "Payroll"
+    },
+    {
+      "amount": 3100.0,
+      "transaction_date": "2026-09-25",
+      "description": "Payroll"
+    },
+    {
+      "amount": 3100.0,
+      "transaction_date": "2026-10-09",
+      "description": "Payroll"
+    }
+  ],
+  "purchases": [
+    {
+      "amount": 183.31,
+      "purchase_date": "2026-07-28",
+      "description": "Chipotle"
+    },
+    {
+      "amount": 171.25,
+      "purchase_date": "2026-07-29",
+      "description": "CVS"
+    },
+    {
+      "amount": 13.06,
+      "purchase_date": "2026-07-30",
+      "description": "CVS"
+    },
+    {
+      "amount": 181.85,
+      "purchase_date": "2026-07-30",
+      "description": "Spotify"
+    },
+    {
+      "amount": 212.11,
+      "purchase_date": "2026-07-31",
+      "description": "Walmart"
+    },
+    {
+      "amount": 81.28,
+      "purchase_date": "2026-08-04",
+      "description": "Torchy's Tacos"
+    },
+    {
+      "amount": 203.18,
+      "purchase_date": "2026-08-06",
+      "description": "Chipotle"
+    },
+    {
+      "amount": 59.61,
+      "purchase_date": "2026-08-08",
+      "description": "Chipotle"
+    },
+    {
+      "amount": 156.71,
+      "purchase_date": "2026-08-11",
+      "description": "Walmart"
+    },
+    {
+      "amount": 59.8,
+      "purchase_date": "2026-08-11",
+      "description": "CVS"
+    },
+    {
+      "amount": 172.3,
+      "purchase_date": "2026-08-12",
+      "description": "Spotify"
+    },
+    {
+      "amount": 38.83,
+      "purchase_date": "2026-08-13",
+      "description": "H-E-B"
+    },
+    {
+      "amount": 146.14,
+      "purchase_date": "2026-08-15",
+      "description": "Amazon"
+    },
+    {
+      "amount": 28.91,
+      "purchase_date": "2026-08-17",
+      "description": "Torchy's Tacos"
+    },
+    {
+      "amount": 142.4,
+      "purchase_date": "2026-08-19",
+      "description": "Torchy's Tacos"
+    },
+    {
+      "amount": 121.21,
+      "purchase_date": "2026-08-19",
+      "description": "Walmart"
+    },
+    {
+      "amount": 140.33,
+      "purchase_date": "2026-08-23",
+      "description": "Amazon"
+    },
+    {
+      "amount": 58.61,
+      "purchase_date": "2026-08-23",
+      "description": "Torchy's Tacos"
+    },
+    {
+      "amount": 89.65,
+      "purchase_date": "2026-08-25",
+      "description": "Walmart"
+    },
+    {
+      "amount": 116.89,
+      "purchase_date": "2026-08-28",
+      "description": "Target"
+    },
+    {
+      "amount": 30.68,
+      "purchase_date": "2026-08-31",
+      "description": "CVS"
+    },
+    {
+      "amount": 172.57,
+      "purchase_date": "2026-09-05",
+      "description": "Amazon"
+    },
+    {
+      "amount": 220.85,
+      "purchase_date": "2026-09-06",
+      "description": "CVS"
+    },
+    {
+      "amount": 197.1,
+      "purchase_date": "2026-09-07",
+      "description": "Amazon"
+    },
+    {
+      "amount": 142.75,
+      "purchase_date": "2026-09-09",
+      "description": "Shell"
+    },
+    {
+      "amount": 204.47,
+      "purchase_date": "2026-09-11",
+      "description": "Amazon"
+    },
+    {
+      "amount": 32.96,
+      "purchase_date": "2026-09-12",
+      "description": "Shell"
+    },
+    {
+      "amount": 234.15,
+      "purchase_date": "2026-09-21",
+      "description": "Chipotle"
+    },
+    {
+      "amount": 204.16,
+      "purchase_date": "2026-09-22",
+      "description": "Shell"
+    },
+    {
+      "amount": 143.07,
+      "purchase_date": "2026-09-29",
+      "description": "H-E-B"
+    },
+    {
+      "amount": 72.72,
+      "purchase_date": "2026-10-01",
+      "description": "Spotify"
+    },
+    {
+      "amount": 200.22,
+      "purchase_date": "2026-10-03",
+      "description": "Chipotle"
+    },
+    {
+      "amount": 227.1,
+      "purchase_date": "2026-10-05",
+      "description": "Target"
+    },
+    {
+      "amount": 49.61,
+      "purchase_date": "2026-10-07",
+      "description": "CVS"
+    },
+    {
+      "amount": 111.58,
+      "purchase_date": "2026-10-08",
+      "description": "Torchy's Tacos"
+    },
+    {
+      "amount": 139.61,
+      "purchase_date": "2026-10-09",
+      "description": "Chipotle"
+    },
+    {
+      "amount": 157.04,
+      "purchase_date": "2026-10-12",
+      "description": "Spotify"
+    },
+    {
+      "amount": 58.88,
+      "purchase_date": "2026-10-15",
+      "description": "Spotify"
+    },
+    {
+      "amount": 68.25,
+      "purchase_date": "2026-10-16",
+      "description": "Amazon"
+    },
+    {
+      "amount": 54.8,
+      "purchase_date": "2026-10-17",
+      "description": "CVS"
+    }
+  ],
+  "bills": [
+    {
+      "payment_amount": 2300,
+      "payee": "Mortgage",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 564.76,
+      "payee": "Toyota Financial Services",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 240,
+      "payee": "Car insurance",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 230,
+      "payee": "Utilities",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 140,
+      "payee": "Phone",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 75,
+      "payee": "Internet",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 50,
+      "payee": "Streaming",
+      "status": "recurring"
+    }
+  ]
+}
