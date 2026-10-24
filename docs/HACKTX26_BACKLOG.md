@@ -337,7 +337,7 @@ Normalization rules:
 
 **How to verify:** run the three curls above. The frontend can also hit them from the browser without CORS errors.
 
-### NM-9 · Persona picker + dashboard (static) `E4` `P0` · 5 pts · **Jose**
+### ✅ NM-9 · Persona picker + dashboard (static) `E4` `P0` · 5 pts · **Jose**
 *As a customer, I want to see my car, my contract and my money at a glance.*
 
 **Context:** This is the first screen judges see. It has to make the customer's situation obvious in about 5 seconds, before any recommendation appears. It's built against the sample JSON so it never waits on the backend.
@@ -357,17 +357,17 @@ Normalization rules:
 - **Style:** Toyota-ish palette in `tokens.css` (red `#EB0A1E`, near-black `#1A1A1A`, white, gray `#F2F2F2`), system font, 8px spacing grid. All money is formatted with `Intl.NumberFormat('en-US', {style:'currency', currency:'USD'})`.
 
 **Tasks:**
-- [ ] `npm i react-router-dom recharts` (do it now so nobody else edits `package.json`)
-- [ ] Stub files for `WhatIfPanel`, `ComparisonTable`, `EquityChart`, rendered in `Dashboard.jsx` with the props from the ownership section; commit and push these first so Samu and Rodrigo can start
-- [ ] React Router with 2 routes
-- [ ] 4 components + 2 pages above
-- [ ] Currency/number formatting helper
-- [ ] Mileage bar for leases
+- [x] `npm i react-router-dom recharts` (do it now so nobody else edits `package.json`)
+- [x] Stub files for `WhatIfPanel`, `ComparisonTable`, `EquityChart`, rendered in `Dashboard.jsx` with the props from the ownership section; commit and push these first so Samu and Rodrigo can start
+- [x] React Router with 2 routes
+- [x] 4 components + 2 pages above
+- [x] Currency/number formatting helper
+- [x] Mileage bar for leases
 
 **Acceptance criteria:**
-- [ ] Picker shows all 3 personas; clicking p1 opens a complete dashboard
-- [ ] No money is computed in the frontend; it only formats what the JSON gives
-- [ ] Readable on a 13" laptop at 100% zoom (that's the judging setup)
+- [x] Picker shows all 3 personas; clicking p1 opens a complete dashboard
+- [x] No money is computed in the frontend; it only formats what the JSON gives
+- [x] Readable on a 13" laptop at 100% zoom (that's the judging setup)
 
 **How to verify:** `npm run dev` → click through all 3 personas (fake sample data for p2/p3 is fine at this stage).
 
