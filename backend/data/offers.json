@@ -1,0 +1,26 @@
+{
+  "source": "synthetic",
+  "offers": [
+    {
+      "id": "prepaid_miles",
+      "title": "Prepaid miles before lease end",
+      "applies_to": ["buy_miles_new_lease"],
+      "terms": "Buy extra miles before your lease ends at $0.15 per mile instead of paying $0.25 per mile at turn-in.",
+      "disclaimer": "Synthetic offer for demo purposes"
+    },
+    {
+      "id": "loyalty_new_vehicle_rate",
+      "title": "Loyalty rate on a new Toyota",
+      "applies_to": ["trade_in_upgrade"],
+      "terms": "Returning TFS customers can finance a new Toyota at 5.9% APR for 60 months.",
+      "disclaimer": "Synthetic offer for demo purposes"
+    },
+    {
+      "id": "lease_buyout_financing",
+      "title": "Lease buyout financing",
+      "applies_to": ["lease_buyout"],
+      "terms": "Finance your lease buyout at 6.9% APR for 60 months.",
+      "disclaimer": "Synthetic offer for demo purposes"
+    }
+  ]
+}
