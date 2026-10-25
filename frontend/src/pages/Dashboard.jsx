@@ -55,7 +55,7 @@ export default function Dashboard() {
     return (
       <main className="page">
         <h1>Customer not found</h1>
-        <Link to="/">← Back to customers</Link>
+        <Link to="/customers">← Back to customers</Link>
       </main>
     )
   }
@@ -84,7 +84,7 @@ export default function Dashboard() {
     <main className="page">
       <header className="header">
         <div className="header-left">
-          <Link to="/" className="back-link">← Switch customer</Link>
+          <Link to="/customers" className="back-link">← Switch customer</Link>
           <h1>Hi, {customer.name}</h1>
         </div>
         <EquityBadge equity={equity} />
