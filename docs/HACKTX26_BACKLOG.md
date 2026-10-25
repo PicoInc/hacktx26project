@@ -646,7 +646,7 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 
 **Other tasks affected by NM-14 (each has a note in its own section):** NM-15 (loading and fallback timing), NM-19 (what the model can and can't quote), NM-20 (drawer copy), NM-21 (cache validated output, print the hallucination count), NM-24 (debug badge from `explanation_source`), NM-26 (the validator only understands US number formats, English-only templates, `lang` in the signature and cache key), NM-31 and NM-32 (Devpost and pitch wording).
 
-### NM-15 · Wire frontend to live API `E4` `P0` · 2 pts · **Jose**
+### ✅ NM-15 · Wire frontend to live API `E4` `P0` · 2 pts · **Jose**
 *As a demo, the UI must show real engine output, not sample JSON.*
 
 **Context:** This is the integration moment for Milestone M2. After this, everything on screen comes from the backend.
@@ -656,25 +656,37 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 **Files:** `frontend/src/api.js`, `frontend/vite.config.js` (proxy)
 
 **Spec:**
-- Vite proxy: `/api` → `http://localhost:5000` (avoids CORS issues and hard-coded hosts)
+- Vite proxy: `/api` → `http://127.0.0.1:5000` (avoids CORS issues and hard-coded hosts; override with `VITE_API_PROXY`)
 - `api.js` functions switch to `fetch`; keep the sample JSON as a fallback behind `VITE_USE_SAMPLE=true`
 - Loading skeletons for the cards (recommendations may take 2–6 s with the LLM)
 - Error state: "Couldn't load recommendations — retry" button
 
 **Tasks:**
-- [ ] Proxy + fetch calls
-- [ ] Loading + error states (the card skeletons replace `<RecommendationList>` in `Dashboard.jsx` while loading)
-- [ ] Remove any remaining hard-coded data from components
-- [ ] Check that the live response carries `action.confirmation` (NM-10 contract change). If it doesn't, the toast quietly falls back to generic text, so check the wording on each card
-- [ ] Timing to plan the skeletons for (NM-13/NM-14): an LLM response takes about 1 s once the server has warmed up (up to about 3.5 s on the first request after a quiet period), and the backend stops waiting after 6 s and returns template text with `explanation_source: "template"`. The request still returns 200 with all explanations filled, so the UI never needs an "explanation failed" state; it only needs the normal loading and error states for the request itself
-- [ ] The POST can be slow while the free-tier LLM quota (5 requests per minute) is exhausted, but it still succeeds with templates. Don't auto-retry on every What-if click or you'll burn the quota; NM-21's cache removes the problem for the demo
-- [ ] The live API returns **2** cards for p1 (see NM-11), and the dashboard includes `equity_timeline` (NM-23) plus extra keys `miles_per_year`, `vehicle_targets`, `vehicle.catalog_id` (NM-8), which the UI can ignore
+- [x] Proxy + fetch calls
+- [x] Loading + error states (the card skeletons replace `<RecommendationList>` in `Dashboard.jsx` while loading)
+- [x] Remove any remaining hard-coded data from components
+- [x] Check that the live response carries `action.confirmation` (NM-10 contract change). If it doesn't, the toast quietly falls back to generic text, so check the wording on each card → *checked: the live API does **not** send it yet (Samu's NM-5 task is still open), so every toast currently shows the generic fallback*
+- [x] Timing to plan the skeletons for (NM-13/NM-14): an LLM response takes about 1 s once the server has warmed up (up to about 3.5 s on the first request after a quiet period), and the backend stops waiting after 6 s and returns template text with `explanation_source: "template"`. The request still returns 200 with all explanations filled, so the UI never needs an "explanation failed" state; it only needs the normal loading and error states for the request itself
+- [x] The POST can be slow while the free-tier LLM quota (5 requests per minute) is exhausted, but it still succeeds with templates. Don't auto-retry on every What-if click or you'll burn the quota; NM-21's cache removes the problem for the demo
+- [x] The live API returns **2** cards for p1 (see NM-11), and the dashboard includes `equity_timeline` (NM-23) plus extra keys `miles_per_year`, `vehicle_targets`, `vehicle.catalog_id` (NM-8), which the UI can ignore
 
 **Acceptance criteria:**
-- [ ] p1 flows picker → dashboard → live cards with LLM explanations
-- [ ] Stopping Flask shows the error state, not a blank page
+- [x] p1 flows picker → dashboard → live cards with LLM explanations
+- [x] Stopping Flask shows the error state, not a blank page
 
 **How to verify:** run both servers, click through p1, then kill Flask and reload.
+
+**What changed / what to know (read this if you build on NM-15):**
+- **How to run:** `cd backend && flask run` (port 5000), then `cd frontend && npm run dev`. The Vite proxy forwards `/api` to `http://127.0.0.1:5000`. It's `127.0.0.1` rather than `localhost` because Node can resolve `localhost` to IPv6 while Flask only listens on IPv4.
+- **Different port (Samu, macOS):** Samu's earlier proxy pointed at 5001. It now defaults to 5000. Either turn off AirPlay Receiver, or run `flask run --port 5001` and put `VITE_API_PROXY=http://127.0.0.1:5001` in `frontend/.env.local` (gitignored; template in `frontend/.env.example`).
+- **No backend:** `VITE_USE_SAMPLE=true` in `frontend/.env.local` serves the bundled sample JSON. Only p1 has sample recommendations, and the sample dashboards have an **empty `equity_timeline`**.
+- **`api.js`:** `getPersonas()`, `getDashboard(id)` and `getRecommendations(id, lifeEvent)` (a POST with `{ life_event }`). Failures throw `ApiError` with `.status`: the HTTP code, or `0` when the server can't be reached. A 404 dashboard shows "Customer not found"; anything else shows a Retry box (`components/ErrorState.jsx`).
+- **Loading:** the dashboard renders as soon as its own data arrives. The recommendations area shows `components/RecommendationSkeleton.jsx` (same layout as the cards) until the POST returns, including after every What-if change. Each request is keyed by customer, life event and retry attempt, so a slow old response is never shown.
+- **What-if (NM-19):** `WhatIfPanel` gets `summary={null}` while a request is in flight, then that request's `life_event_applied`.
+- **`ComparisonTable` (NM-22):** it's only rendered once recommendations have loaded, so it always gets a real `considered` array.
+- **`EquityChart` (NM-23):** it gets the live `equity_timeline` straight from the dashboard. Handle an empty array, which is what sample mode sends.
+- **Picker:** it shows "Loading customers…" and a Retry box on failure. It still calls each dashboard to get the car label, because `/api/personas` has no vehicle.
+- **Fixed on the way (backend, Rodrigo and Samu's files):** three JSON readers (`customer_profile.py`, `profile.py`, `engine/constants.py`) opened files without `encoding="utf-8"`. On Windows the taglines showed "Â·". Now fixed, with a test in `backend/tests/test_data_encoding.py`. **Always pass `encoding="utf-8"` to `open()`.**
 
 ### ✅ NM-16 · Soft submission `E6` `P0` · 1 pt · **Rodrigo**
 *As a team, we lock in a submission early so nothing can go wrong at 11:29 AM tomorrow.*
@@ -793,6 +805,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 
 **From NM-13 / NM-14:** each What-if change calls the LLM again (about 1 s, or instant once NM-21's cache has that combination). The explanation model only sees the event's `type` and `params`, not `life_event_applied` or `finances_after_event`, so card text can mention "your new baby" or the event's own numbers (for example, an income drop of 20%) but can't quote the new surplus; that number belongs in your banner. Any number the model writes that isn't in the option or the event params is replaced by the template. The slider's debounce also protects the free-tier limit of 5 requests per minute.
 
+**From NM-15:** every change to `lifeEvent` (via `onChange`) immediately re-requests recommendations. The cards switch to the loading skeleton until the response arrives, and `summary` is `null` meanwhile, so render no banner while it's `null`. Debounce the slider inside `WhatIfPanel` before calling `onChange`, since the Dashboard doesn't debounce for you.
+
 **Tasks:**
 - [ ] Chips + slider + reset
 - [ ] Re-fetch with debounce (300 ms on the slider)
@@ -873,6 +887,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 
 **Spec:** a collapsible section "All options we considered (N)". Columns: Option · Monthly · Δ vs today · Upfront · Total · Status. Status is a green "Affordable" or a gray "Not recommended" with `rejection_reason` as a tooltip or second line. Sorted by rank.
 
+**From NM-15:** `<ComparisonTable considered={...} />` is only rendered once the recommendations request has succeeded, so `considered` is always a real array (while loading, the skeleton shows instead). It sits inside `<div id="all-options">`, the target of the cards' "We also considered N other options" link.
+
 **From NM-10:** the cards' "We also considered N other options" link points to `#all-options`, a `<div>` that `Dashboard.jsx` already wraps around `<ComparisonTable>`, so you don't need to add an id. `considered` includes the top 3 as well as the rejected options. Rejected items carry only `id, title, monthly_payment, delta_monthly, upfront_cost, total_cost, affordable, rejection_reason` (no `rank`), so sort them after the ranked ones.
 
 **From NM-12 (live API):** in the live response, rejected options are full option objects with `rank: null` (not the reduced shape above), and every item has `kind`. Sort by `rank` with `null` last.
@@ -893,6 +909,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 **Blocked by:** NM-8 for the backend half (✅ done), and NM-15 for the chart. Rodrigo owns both halves; ask Samu to review the amortization use.
 
 **Files:** `frontend/src/components/EquityChart.jsx` ⏳; backend: `services/equity.py` ✅ (`equity_timeline`, built on Samu's `engine.finance` functions), `routes.py` ✅ (`equity_timeline` is in the dashboard response)
+
+**From NM-15:** the chart is unblocked. `Dashboard.jsx` passes the live `equity_timeline` from `/api/customers/<id>/dashboard` as `<EquityChart timeline={...} contractType={contract.type} />`, no other wiring needed. In sample mode (`VITE_USE_SAMPLE=true`) the timeline is an **empty array**, so render nothing (or a short note) instead of crashing.
 
 **Spec:**
 - Backend: `equity_timeline(profile, months=24) -> [{ month, value, payoff }]` (value depreciates at `DEPRECIATION_PER_YEAR`, payoff from the amortization schedule)
@@ -920,7 +938,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 
 **Tasks:**
 - [ ] Consistent spacing and typography; Toyota-inspired palette (no official logos; use a text wordmark "Next Move")
-- [ ] Empty, loading and error states on every screen
+- [ ] Empty, loading and error states on every screen (*NM-15 did the persona picker, the dashboard and the recommendations area: `ErrorState.jsx` with Retry, `RecommendationSkeleton.jsx`; check the remaining components, e.g. the What-if banner, comparison table and chart*)
 - [ ] Favicon, page titles, a nice persona-picker header
 - [ ] Check at 1280×800 and on the projector resolution (1920×1080)
 - [ ] Remove console errors and warnings

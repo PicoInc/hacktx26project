@@ -15,7 +15,7 @@ def load_mock_bank_data(customer_id):
     file_path = MOCK_BANK_FOLDER / f"{customer_id}.json"
     if not file_path.exists():
         raise FileNotFoundError(f"No mock bank data for customer '{customer_id}'")
-    with open(file_path) as file:
+    with open(file_path, encoding="utf-8") as file:
         return json.load(file)
 
 
