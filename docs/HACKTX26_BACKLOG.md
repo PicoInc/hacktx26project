@@ -121,7 +121,7 @@ Rule of thumb: **Samu and Rodrigo meet at NM-12** (Rodrigo's endpoint calls Samu
 
 ## Sprint 1 — Layers work alone (Sat 3:45 → 7:00 PM)
 
-### NM-4 · Core finance math `E1` `P0` · 3 pts · **Samu**
+### ✅ NM-4 · Core finance math `E1` `P0` · 3 pts · **Samu**
 *As the engine, I need correct payment math so every recommendation is trustworthy.*
 
 **Context:** Every number a customer sees comes from these functions. The judges' responsible-AI question will be "how do you know the numbers are right?", and the answer is these tested pure functions. They're the foundation for NM-5, NM-11 and NM-17.
@@ -151,14 +151,14 @@ def monthly_fuel_cost(miles_per_year: int, mpg: float, fuel_price: float) -> flo
 `constants.py` holds **every** assumption from the Appendix (rates, fees, thresholds). No magic numbers anywhere else in the engine.
 
 **Tasks:**
-- [ ] Create `constants.py` with the full Appendix A table
-- [ ] Implement the 8 functions above with docstrings
-- [ ] Unit tests using the reference values below
-- [ ] Edge cases: APR 0, term 1, payments_made == term (balance ≈ 0), negative equity
+- [x] Create `constants.py` with the full Appendix A table
+- [x] Implement the 8 functions above with docstrings
+- [x] Unit tests using the reference values below
+- [x] Edge cases: APR 0, term 1, payments_made == term (balance ≈ 0), negative equity
 
 **Acceptance criteria:**
-- [ ] `pytest backend/engine/tests/test_finance.py` passes
-- [ ] Reference values match to the cent (±$0.01):
+- [x] `pytest backend/engine/tests/test_finance.py` passes
+- [x] Reference values match to the cent (±$0.01):
   - `loan_payment(30000, 4.9, 60)` → **564.76**
   - `loan_balance(30000, 4.9, 60, 22)` → **≈ 19,841**
   - `loan_payment(22000, 9.9, 72)` → **406.46**
@@ -167,7 +167,10 @@ def monthly_fuel_cost(miles_per_year: int, mpg: float, fuel_price: float) -> flo
 
 **How to verify:** run pytest, and paste one case into an online loan calculator (e.g. bankrate.com) as a sanity check.
 
-### NM-5 · Option builder `E1` `P0` · 5 pts · **Samu**
+**Done (Samu, merged into `dev`):** `constants.py`, `finance.py` and `test_finance.py`. Every reference value above is asserted and passes on `dev` (564.76, ≈19,841, 406.46, ≈12,615, 284.37, 35,100, 1,275.00, 294.34, 93.75), plus the edge cases (APR 0, final payment, bad input).
+- Since `5b72de3` (Rodrigo), `VEHICLE_CATALOG` is loaded from `backend/data/vehicle_catalog.json`, so car specs have one source of truth. The rate, fee and guardrail constants still live in `constants.py`.
+
+### ✅ NM-5 · Option builder `E1` `P0` · 5 pts · **Samu**
 *As a customer, I want every realistic option compared so I can see my choices side by side.*
 
 **Context:** This is what turns "a car + a contract + finances" into the list of possible moves. NM-11 then filters and ranks this list. Each option must carry everything the UI card and the LLM need, so nobody downstream does math.
@@ -221,20 +224,26 @@ Every option returns this exact shape (it becomes a card):
 Action kinds: `self_service` (buyout, refinance, extra miles, extension), `follow_up` (talk to an advisor, deferral, recall), `offer` (trade-in / new lease using `offers.json`).
 
 **Tasks:**
-- [ ] Lease option generators (4)
-- [ ] Loan option generators (5), relief options behind a flag
-- [ ] Trade-offs: 1–3 short strings per option, written from the numbers (no LLM)
-- [ ] Assumptions dict on every option
-- [ ] `action.confirmation` on every option: one customer-facing sentence about what happens next, no numbers (added by NM-10; see the p1 sample for wording)
-- [ ] Tests per persona (use the fixtures in Appendix B)
+- [x] Lease option generators (4)
+- [x] Loan option generators (5), relief options behind a flag
+- [x] Trade-offs: 1–3 short strings per option, written from the numbers (no LLM)
+- [x] Assumptions dict on every option
+- [x] `action.confirmation` on every option: one customer-facing sentence about what happens next, no numbers (added by NM-10; see the p1 sample for wording)
+- [x] Tests per persona (use the fixtures in Appendix B)
 
 **Acceptance criteria:**
-- [ ] p1 produces `lease_buyout` at **$294.34/mo** and `buy_miles_new_lease` with upfront **$1,160**
-- [ ] p2 produces `keep` at **$564.76** and `trade_in_upgrade` (Highlander) at **≈ $797.33**, and **no** `refinance` (4.9% < 6.4%)
-- [ ] p3 produces `refinance` at **≈ $386.06**, `trade_in_upgrade` (Camry Hybrid) at **≈ $465.09**, equity used **≈ $8,385**
-- [ ] Every option has all fields in the shape above (a test asserts the keys)
+- [x] p1 produces `lease_buyout` at **$294.34/mo** and `buy_miles_new_lease` with upfront **$1,160** *(the new-lease payment is now $310.40 after the 2027 Corolla MSRP change in `7682bff`)*
+- [x] p2 produces `keep` at **$564.76** and `trade_in_upgrade` (Highlander) at **≈ $797.33**, and **no** `refinance` (4.9% < 6.4%)
+- [x] p3 produces `refinance` at **≈ $386.06**, `trade_in_upgrade` (Camry Hybrid) at **≈ $465.09**, equity used **≈ $8,385**
+- [x] Every option has all fields in the shape above (a test asserts the keys)
 
 **How to verify:** `pytest backend/engine/tests/test_options.py -v` and print the options for each persona.
+
+**Done (Samu, merged into `dev`):** `options.py` builds all 9 option kinds through a single `_option()` factory, and `engine/tests/fixtures.py` holds the 3 personas in the dashboard shape. Covered by `test_options.py`.
+- **ids:** options carry `kind` (the type: use it for logic and tests) and `target` (catalog id or `null`). `id` is `kind` or `kind:target` (e.g. `trade_in_upgrade:highlander_xle_2027`), so ids are unique.
+- **p1's new-lease payment is now $310.40, not $324.20.** `7682bff` (Rodrigo) lowered the 2027 Corolla MSRP to $22,500. Upfront costs are unchanged ($1,160 prepaid miles, $1,670 return).
+- **Relief options** (`extend_term`, `payment_deferral`) are only generated with `include_relief=True`. `payment_deferral` gets a first-year average `effective_monthly`, so a $0 payment never looks "free" in the ranking.
+- **Longer commute (NM-17):** lease projections add `extra_miles_per_year × months_remaining / 12`.
 
 ### NM-6 · Synthetic Toyota data `E2` `P0` · 3 pts · **Rodrigo**
 *As a demo, we need 3 believable customers whose data produces the story we want to tell.*
@@ -422,7 +431,7 @@ The list shows the top 3 `recommendations`. Below it, a muted line: "We also con
 
 > **6 PM: someone attends the Toyota workshop (GDC 1.304).** Ask: (1) what makes a winning demo for them, (2) do they have sample data or real fee/APR ranges we should use, (3) which next steps (self-service vs follow-up) matter most to TFS. Post the answers in the team chat.
 
-### NM-11 · Affordability guardrails + ranking `E1` `P0` · 3 pts · **Samu**
+### ✅ NM-11 · Affordability guardrails + ranking `E1` `P0` · 3 pts · **Samu**
 *As a customer, I only want recommendations I can actually afford, in a sensible order.*
 
 **Context:** This is the responsible-AI core and the main judging point. The engine, not the LLM, decides what's affordable and what ranks first, and it always says why something was rejected.
@@ -459,21 +468,26 @@ Rules 1–2 skip options that *lower* the payment (relief options, refinance).
 Every `considered` item gets `affordable: bool` and `rejection_reason: str | null`.
 
 **Tasks:**
-- [ ] Implement the 3 rules with human-readable reasons (numbers inside, formatted)
-- [ ] Ranking function exactly as above
-- [ ] `talk_to_advisor` card
-- [ ] `recommend()` wiring: build options → check affordability → rank → top 3
-- [ ] Tests for each rule, the handoff, and each persona's expected #1 (Appendix B)
+- [x] Implement the 3 rules with human-readable reasons (numbers inside, formatted)
+- [x] Ranking function exactly as above
+- [x] `talk_to_advisor` card
+- [x] `recommend()` wiring: build options → check affordability → rank → top 3
+- [x] Tests for each rule, the handoff, and each persona's expected #1 (Appendix B)
 
 **Acceptance criteria:**
-- [ ] p1 → #1 `lease_buyout`, #2 `buy_miles_new_lease`, last `return_walk_away`; `return_new_lease` rejected by rule 3
-- [ ] p2 → #1 `keep`, #2 `trade_in_upgrade` (Highlander, affordable at baseline)
-- [ ] p3 → #1 `trade_in_upgrade` (goal `newer_vehicle`), #2 `refinance`, #3 `keep`
-- [ ] Every rejected option has a non-empty `rejection_reason`
+- [x] p1 → #1 `lease_buyout`, #2 `buy_miles_new_lease`; `return_new_lease` rejected by rule 3 *(`return_walk_away` is also rejected by rule 3, not ranked last; see the note below)*
+- [x] p2 → #1 `keep`, #2 `trade_in_upgrade` (Highlander, affordable at baseline)
+- [x] p3 → #1 `trade_in_upgrade` (goal `newer_vehicle`), #2 `refinance`, #3 `keep`
+- [x] Every rejected option has a non-empty `rejection_reason`
 
 > **Status after the NM-18 merge (found during NM-13):** `recommend(P1)` now returns `lease_buyout` #1 and `buy_miles_new_lease` #2 (the earlier rule 1 rejection is fixed), and the guardrails tests pass. Two things differ from the criteria above and from NM-10's 3-card p1 sample: p1 gets **2** recommendations, because `return_walk_away` is now rejected by rule 3 ("Upfront cost of $1,670 would leave $930 in savings, less than one month of bills ($1,150)"), and `return_new_lease` is rejected for the same reason. If the demo needs a third card for p1, that's a data or rule decision for Samu and Rodrigo. The cards and `RecommendationList` handle 2 cards fine. Reminder: the LLM repeats `rejection_reason` to the customer, so this wording is customer-facing.
 
 **How to verify:** `pytest backend/engine/tests -v`, then print `recommend(profile)` for each persona.
+
+**Done (Samu, merged into `dev`):** `guardrails.py` (`check_affordability`, `is_relief_needed`, `GOAL_MATCHES`, `rank_options`) and `recommend.py` (`recommend()`, the pinned `talk_to_advisor` card, `previous_rank`, `finances_after_event`). Covered by `test_guardrails.py`, and end to end by Rodrigo's `test_personas.py`.
+- **Actual results on `dev`:** p1 → `lease_buyout`, `buy_miles_new_lease` (2 cards); `return_new_lease` **and** `return_walk_away` rejected by rule 3 ($930 left < $1,150 of bills). p2 → `keep`, `trade_in_upgrade`. p3 → `trade_in_upgrade`, `refinance`, `keep`. The first acceptance line expected `return_walk_away` last; it's rejected instead, which is intended (same $1,670 upfront).
+- **Relief / handoff:** `relief_needed` when `monthly_surplus < 0` (`RELIEF_SURPLUS_MIN = 0`), and then `talk_to_advisor` is pinned at #1.
+- **Open follow-up:** the rule 1 message still prints the percentage with no decimals, so a 15.4% payment reads "15% of your income (limit 15%)". It doesn't trigger for any persona today, but it's customer-facing through the LLM (see the NM-13 note). Fix: `{pct:.1f}%` in `check_affordability`.
 
 ### NM-12 · Recommendations endpoint `E2` `P0` · 2 pts · **Rodrigo**
 *As the frontend, I need ranked recommendations from one API call.*
@@ -645,7 +659,7 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 
 ---
 
-### NM-17 · Life events `E1` `P0` · 3 pts · **Samu**
+### ✅ NM-17 · Life events `E1` `P0` · 3 pts · **Samu**
 *As a customer, I want to ask "what if?" and see my best move change.*
 
 **Context:** The "What if?" simulator is our differentiator, and it creates the demo's key moment: the Reyes family's Highlander gets **rejected as unaffordable** after the baby.
@@ -670,21 +684,29 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 `recommend()` applies the event before building options, and returns `life_event_applied` with a one-line human summary ("Income down 20% → monthly surplus now −$340").
 
 **Tasks:**
-- [ ] 3 P0 events (+2 P1 if time allows)
-- [ ] Event summary string
-- [ ] Tests per event against Appendix B's expected outcomes
+- [x] 3 P0 events *(the 2 P1 events, `job_change` and `move`, were not built)*
+- [x] Event summary string
+- [x] Tests per event against Appendix B's expected outcomes
 
 **Acceptance criteria:**
-- [ ] p2 + `new_baby` → surplus $900 → $400; Highlander (+$233/mo) **rejected** by rule 2 (limit $200); #1 is `keep`
-- [ ] p2 + `income_drop` 20% → surplus −$340 → `relief_needed` → #1 `talk_to_advisor`, followed by `extend_term` (≈ $439.52) and `payment_deferral`
-- [ ] p1 + `longer_commute` → overage grows to 7,100 mi; `buy_miles_new_lease` becomes rejected (rule 3); buyout stays #1
-- [ ] The original profile object is unchanged after `apply_life_event`
+- [x] p2 + `new_baby` → surplus $900 → $400; Highlander (+$233/mo) **rejected** by rule 2 (limit $200); #1 is `keep`
+- [x] p2 + `income_drop` 20% → surplus −$340 → `relief_needed` → #1 `talk_to_advisor`, followed by `extend_term` (≈ $439.52) and `payment_deferral`
+- [x] p1 + `longer_commute` → overage grows to 7,100 mi; `buy_miles_new_lease` becomes rejected (rule 3); buyout stays #1
+- [x] The original profile object is unchanged after `apply_life_event`
 
 **How to verify:** `pytest backend/engine/tests/test_events.py -v`
 
 > NM-17 sits in Sprint 2 so Samu's evenings are balanced: it only needs NM-11, and finishing it early unblocks the What-if panel and persona tuning.
 
 ---
+
+**Done (Samu, merged into `dev`):** `events.py` (`ALLOWED_EVENTS`, `DEFAULT_PARAMS`, `apply_life_event`, `describe_life_event`) plus the commute miles in `options.py`. Covered by `test_events.py`. All four expected outcomes pass on `dev`:
+- p2 + `new_baby` → "Baby on the way (+$500/mo) → monthly surplus now $400"; only `keep`; the Highlander is rejected with `previous_rank: 2`.
+- p2 + `income_drop` 20% → "Income down 20% → monthly surplus now −$340"; `talk_to_advisor`, `extend_term`, `payment_deferral`.
+- p1 + `longer_commute` → "projected 7,100 miles over your lease"; `lease_buyout` stays #1; prepaid miles ($1,460 upfront) rejected.
+- The input profile is never mutated.
+- **For NM-12 (Rodrigo):** import `ALLOWED_EVENTS` from `engine.events` for the 400 check. Invalid params raise `ValueError`, which maps to a 400.
+- `job_change` and `move` (P1) were not built.
 
 ## Sprint 3 — Full MVP (Sat 10:30 PM → Sun 3:00 AM)
 
