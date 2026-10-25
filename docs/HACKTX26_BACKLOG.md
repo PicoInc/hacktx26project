@@ -373,7 +373,7 @@ Normalization rules:
 
 **How to verify:** `npm run dev` → click through all 3 personas (fake sample data for p2/p3 is fine at this stage).
 
-### NM-10 · Recommendation cards (static) `E4` `P0` · 3 pts · **Jose**
+### ✅ NM-10 · Recommendation cards (static) `E4` `P0` · 3 pts · **Jose**
 *As a customer, I want 2–3 clear cards telling me what to do.*
 
 **Context:** The card is the product. It must answer "what should I do, what does it cost me, why, and what do I click" without scrolling.
@@ -400,7 +400,7 @@ The list shows the top 3 `recommendations`. Below it, a muted line: "We also con
 - [x] Action button click → `alert()` / toast saying what would happen ("Buyout started — a TFS specialist will confirm within 1 business day")
 
 **Acceptance criteria:**
-- [ ] 3 cards render from the sample; the #1 card is visually dominant
+- [x] 3 cards render from the sample; the #1 card is visually dominant
 - [x] Each action kind looks different
 - [x] All fields come from JSON; nothing is hard-coded in JSX
 
