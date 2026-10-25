@@ -471,7 +471,7 @@ Every `considered` item gets `affordable: bool` and `rejection_reason: str | nul
 - [ ] p3 → #1 `trade_in_upgrade` (goal `newer_vehicle`), #2 `refinance`, #3 `keep`
 - [ ] Every rejected option has a non-empty `rejection_reason`
 
-> **Open issue found during NM-13 (Samu):** on `dev`, `recommend(P1)` returns only `lease_buyout`, so two of your own tests fail: `test_guardrails.py::test_p1_maya` and `::test_contract_fields_and_ranks`. `buy_miles_new_lease` ($324.20 on a $2,100 income) is rejected by rule 1 with "Payment would be 15% of your income (limit 15%)". The rule is working as specified ($324.20 / $2,100 = 15.4%, over the 15% limit), but the message rounds to a whole number, so it reads "15% (limit 15%)". The criteria above and NM-18 expect it to be #2, and NM-10's sample JSON shows 3 cards for p1, so the persona numbers and the rule disagree. Per NM-18, fix the data first (p1's income or the new-lease terms) and change the constant only if the data can't fix it, and tell the team. Also show the percentage to one decimal ("15.4%"). The LLM repeats `rejection_reason` to the customer, so this wording is customer-facing.
+> **Status after the NM-18 merge (found during NM-13):** `recommend(P1)` now returns `lease_buyout` #1 and `buy_miles_new_lease` #2 (the earlier rule 1 rejection is fixed), and the guardrails tests pass. Two things differ from the criteria above and from NM-10's 3-card p1 sample: p1 gets **2** recommendations, because `return_walk_away` is now rejected by rule 3 ("Upfront cost of $1,670 would leave $930 in savings, less than one month of bills ($1,150)"), and `return_new_lease` is rejected for the same reason. If the demo needs a third card for p1, that's a data or rule decision for Samu and Rodrigo. The cards and `RecommendationList` handle 2 cards fine. Reminder: the LLM repeats `rejection_reason` to the customer, so this wording is customer-facing.
 
 **How to verify:** `pytest backend/engine/tests -v`, then print `recommend(profile)` for each persona.
 
@@ -542,7 +542,7 @@ Pass the model only the fields it needs: title, monthly_payment, delta_monthly, 
 - [x] p1's 3 cards show sensible explanations that use their numbers *(checked by calling `explain_all` directly on p1's options and on p2 + `new_baby`; the same check through the real endpoint is an NM-12 acceptance criterion)*
 - [x] A timeout or error falls back to the template (NM-14) and the endpoint still returns 200 *(`explain_all` never raises; covered by `backend/tests/test_llm.py`; the endpoint part is an NM-12 acceptance criterion)*
 
-**Other tasks affected by NM-13 (each has a note in its own section):** NM-8 and NM-12 (Rodrigo: `app.py` now calls `warm_up()`; round money before `explain_all`), NM-11 (Samu: p1 gets only one recommendation), NM-14 and NM-21 (Jose: validator hook, cache rules), NM-18 (check the explanations).
+**Other tasks affected by NM-13 (each has a note in its own section):** NM-8 and NM-12 (Rodrigo: `app.py` now calls `warm_up()`; round money before `explain_all`), NM-11 (Samu: p1 now gets 2 recommendations, not 3), NM-14 and NM-21 (Jose: validator hook, cache rules), NM-18 (check the explanations).
 
 **How to verify:** call the endpoint for p1 and read the explanations out loud. Do they sound like a helpful TFS rep?
 
@@ -689,7 +689,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - [ ] Integration test: for every row of the Appendix B "expected outcomes" table, assert the #1 option id
 - [ ] If an assertion fails, adjust **data**, not rules (change the constants only if the data can't fix it, and tell the team)
 - [ ] Sanity-read every explanation for every persona/event combo (NM-13 notes: the model sometimes adds small unsupported claims, and it repeats `rejection_reason` verbatim, so reword confusing reasons in the engine, not the prompt)
-- [ ] Re-check p1 once Samu fixes the NM-11 issue above: the engine must return 3 ranked cards, as the demo script expects
+- [ ] Decide whether p1 should show 3 cards: after the NM-11 fix the engine returns 2 (see the NM-11 status note), while the NM-10 sample and the demo script show 3
 
 **Acceptance criteria:**
 - [ ] `test_personas.py` passes for all 8 persona/event combinations in Appendix B

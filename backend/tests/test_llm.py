@@ -110,7 +110,7 @@ def test_payload_only_has_allowed_fields_and_formatted_money(monkeypatch, recs):
     assert buyout["delta_monthly"].startswith("+$")
     assert buyout["upfront_cost"] == "$0"
     assert "rejection_reason" not in buyout
-    rejected = next(o for o in sent["options"] if o["id"].startswith("buy_miles_new_lease"))
+    rejected = next(o for o in sent["options"] if o["id"].startswith("return_new_lease"))
     assert rejected["rejection_reason"]
 
 
