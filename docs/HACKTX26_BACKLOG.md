@@ -492,6 +492,7 @@ Every `considered` item gets `affordable: bool` and `rejection_reason: str | nul
 - [ ] Call Jose's `services.llm.explain_all(recommendations, profile, life_event)` and copy `text` → `explanation`, `source` → `explanation_source` on each recommendation. Until NM-13 lands, Jose pushes a stub that returns template text, so this works from the start
 - [ ] Also return `finances_after_event` (from Samu's `recommend()` output) so the finance snapshot can update during What-if
 - [ ] Pass each option's `action` through unchanged, including `action.confirmation` (added by NM-10; the card shows it as the click toast)
+- [ ] `explain_all` (NM-13) is final and never raises; call it with `recommend()`'s top 3. **Round money once before calling it** (`round(x, 2)`) so the text and the card show the same cents. `explain_all` formats with the same rounding, but an unrounded 797.325 can print as $797.32 in the text and $797.33 on the card
 
 **Acceptance criteria:**
 - [ ] `curl -X POST .../p1/recommendations -H 'Content-Type: application/json' -d '{"life_event":null}'` returns 3 ranked recommendations with p1's numbers
@@ -527,16 +528,25 @@ Prompt rules (put them in `explain.txt`):
 Pass the model only the fields it needs: title, monthly_payment, delta_monthly, upfront_cost, total_cost, tradeoffs, action.label, the customer's first name, and the life event.
 
 **Tasks:**
-- [ ] Provider client with a 6-second timeout
-- [ ] Prompt file + JSON-mode parsing
-- [ ] Replace the stub with the real call; NM-12's route doesn't change
-- [ ] `.env`: `LLM_API_KEY`, `LLM_MODEL`
+- [x] Provider client with a 6-second timeout
+- [x] Prompt file + JSON-mode parsing
+- [x] Replace the stub with the real call; NM-12's route doesn't change
+- [x] `.env`: `LLM_API_KEY`, `LLM_MODEL`
 
 **Acceptance criteria:**
-- [ ] p1's 3 cards show sensible explanations that use their numbers
-- [ ] A timeout or error falls back to the template (NM-14) and the endpoint still returns 200
+- [ ] p1's 3 cards show sensible explanations that use their numbers *(checked by calling `explain_all` directly on p1's options and on p2 + `new_baby`; the endpoint check waits for NM-12)*
+- [x] A timeout or error falls back to the template (NM-14) and the endpoint still returns 200 *(`explain_all` never raises; covered by `backend/tests/test_llm.py`; the endpoint part waits for NM-12)*
 
 **How to verify:** call the endpoint for p1 and read the explanations out loud. Do they sound like a helpful TFS rep?
+
+**What changed / what to know (read this if you build on NM-13):**
+- **Setup:** put `LLM_API_KEY=<key>` (a Google AI Studio key, starts with `AIza`) and `LLM_MODEL=gemini-3.8-flash` in `backend/.env`, with no quotes. The old default `gemini-2.5-flash` is no longer available to new accounts and returns a 404, which silently falls back to templates. `.env.example` and the code default now use `gemini-3.8-flash`. Local Python env: `conda create -n hacktx26 python=3.12`, then `pip install -r backend/requirements.txt`.
+- **One call per request, with a hard 6 s wait:** the Gemini API rejects deadlines under 10 s, so the SDK timeout is 10 s (`HTTP_TIMEOUT_MS`) and `explain_all` stops waiting after `TIMEOUT_S = 6` (`_call_with_deadline`, a worker thread). Measured latency is about 3.5–5 s, with occasional runs over 6 s that fall back to templates. The cache (NM-21) is what makes the demo reliable.
+- **Free-tier rate limit:** 5 requests per minute per model. Hitting it falls back to templates (logged as a warning), so run `warm_cache.py` (NM-21) slowly, about one call every 15 s.
+- **What the model sees:** only `id, title, monthly_payment, delta_monthly, upfront_cost, total_cost, tradeoffs, action_label` (plus `rejection_reason` when set), the customer's first name and the raw `life_event`. Money is **pre-formatted strings** (`$294.34`, `$1,160`, `+$9.97`) from `templates.format_money`, so the model copies numbers instead of formatting them.
+- **Fallback is per option:** a missing id, a non-string value, bad JSON, a missing key or any exception leaves that option on `template_explanation` with `source: "template"`.
+- **Explanations may name rejected options:** the engine's `rejection_reason` text is passed through. The model repeats it kindly, so wording like "15% of your income (limit 15%)" comes from NM-11 and may need Samu to reword it.
+- **Hook for NM-14:** a `# NM-14` comment in `explain_all` marks where `validate(text, rec)` goes. The model has made small unsupported claims (for example, "set up payment reminders"), which is why the validator and the "use only facts in the JSON" prompt rule matter.
 
 ### NM-14 · Number validator + fallback `E3` `P0` · 2 pts · **Jose**
 *As a responsible-AI feature, the LLM must never show a number we didn't compute.*
@@ -556,8 +566,10 @@ def template_explanation(option: dict) -> str     # "{title}: ${monthly_payment}
 ```
 Return `explanation_source: "llm" | "template"` on each recommendation (the UI can show a tiny badge in debug mode).
 
+**Already done in NM-13:** `template_explanation` and `format_money` live in `backend/services/templates.py` and are tested in `backend/tests/test_llm.py`. `explain_all` has a `# NM-14` comment where `validate(text, rec)` goes: reject the text and keep the template when it returns False. The LLM is given money as formatted strings (`$1,275`, `$294.34`, `+$9.97`), so `allowed_numbers` must accept those forms as well as the raw numbers.
+
 **Tasks:**
-- [ ] Validator + template
+- [ ] Validator (the template is done in NM-13)
 - [ ] Tests, including a deliberately bad string ("only $199/mo at 2.9%") that must fail
 - [ ] Log rejections (useful for the pitch: "we caught N hallucinations during testing")
 
@@ -744,6 +756,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - Cache key: `f"{customer_id}:{life_event_type or 'none'}:{params_hash}"` → the explanations dict
 - `warm_cache.py` calls every persona × event combo from Appendix B and saves the results
 - `CACHE_ONLY=true` env var: never call the LLM, read the cache only (template if missing)
+
+**From NM-13:** the cache stores exactly what `llm.explain_all` returns (`{ option_id: { text, source } }`). `llm._call_llm` is the single function that talks to Gemini, so `CACHE_ONLY` should skip `explain_all`'s LLM call entirely. The free tier allows 5 requests per minute, so `warm_cache.py` must pause between calls (about 15 s), and it should skip writing entries whose `source` is `"template"` (a rate-limit or timeout fallback), so a bad run never gets cached.
 
 **Tasks:**
 - [ ] Disk cache read/write
