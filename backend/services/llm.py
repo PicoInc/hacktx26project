@@ -34,12 +34,13 @@ def _first_name(name: str) -> str:
     return name.split()[0] if name.split() else name
 
 
-def _signed_money(n: float) -> str:
-    if n > 0:
-        return "+" + format_money(n)
-    if n < 0:
-        return "-" + format_money(-n)
-    return format_money(0)
+def _change_vs_today(delta: float) -> str:
+    """Words, not a signed number: models repeat a '+$9.97' / '-$20.40' sign next to 'more'/'less'."""
+    if round(delta, 2) > 0:
+        return f"{format_money(delta)} more per month than today"
+    if round(delta, 2) < 0:
+        return f"{format_money(-delta)} less per month than today"
+    return "the same as today"
 
 
 def _option_payload(rec: dict) -> dict:
@@ -48,7 +49,7 @@ def _option_payload(rec: dict) -> dict:
         "id": rec["id"],
         "title": rec["title"],
         "monthly_payment": format_money(rec["monthly_payment"]),
-        "delta_monthly": _signed_money(rec["delta_monthly"]),
+        "change_vs_today": _change_vs_today(rec["delta_monthly"]),
         "upfront_cost": format_money(rec["upfront_cost"]),
         "total_cost": format_money(rec["total_cost"]),
         "tradeoffs": rec.get("tradeoffs", []),
