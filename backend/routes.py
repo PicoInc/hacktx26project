@@ -5,6 +5,7 @@ from engine.finance import equity
 from engine.recommend import recommend
 from services.customer_profile import build_profile, list_personas
 from services.llm import explain_all
+from services.equity import equity_timeline
 
 api = Blueprint("api", __name__)
 
@@ -61,7 +62,7 @@ def get_dashboard(customer_id):
     dashboard = {
         **profile,
         "equity": {"value": equity_value, "status": equity_status},
-        "equity_timeline": [],
+        "equity_timeline": equity_timeline(profile),
     }
     return jsonify(dashboard)
 
