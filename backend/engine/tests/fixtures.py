@@ -9,8 +9,8 @@ P1 = {  # Maya: Corolla lease ending, over on miles
                 "mileage": 31200, "est_value": 18900},
     "contract": {"type": "lease", "monthly_payment": 284.37, "months_elapsed": 32, "months_remaining": 4,
                  "residual": 14600, "payoff": 14600, "miles_allowed_total": 30000, "apr": 4.2},
-    "finances": {"monthly_income": 2100, "monthly_bills": 1150, "monthly_spending": 520,
-                 "monthly_surplus": 430, "savings": 2600, "checking": 640, "source": "mock"},
+    "finances": {"monthly_income": 2200, "monthly_bills": 1150, "monthly_spending": 520,
+                 "monthly_surplus": 530, "savings": 2600, "checking": 640, "source": "mock"},
 }
 
 P2 = {  # Reyes family: RAV4 loan, baby on the way
