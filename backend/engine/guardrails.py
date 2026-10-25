@@ -31,7 +31,7 @@ def check_affordability(option: dict, finances: dict) -> tuple[bool, str | None]
         limit = C.PAYMENT_TO_INCOME_MAX * income
         if option["monthly_payment"] > limit:
             pct = option["monthly_payment"] / income * 100 if income > 0 else float("inf")
-            return False, (f"Payment would be {pct:.0f}% of your income "
+            return False, (f"Payment would be {pct:.1f}% of your income "
                            f"(limit {C.PAYMENT_TO_INCOME_MAX:.0%})")
 
     # Rule 2: payment increase <= 50% of monthly surplus

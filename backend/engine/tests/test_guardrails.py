@@ -22,7 +22,12 @@ def kinds(options):
 
 def test_rule1_payment_to_income():
     ok, reason = check_affordability(opt(monthly_payment=1000, delta_monthly=100), FIN)   # 16.7% > 15%
-    assert not ok and "17% of your income" in reason
+    assert not ok and "16.7% of your income" in reason
+
+
+def test_rule1_message_keeps_decimal_near_limit():
+    ok, reason = check_affordability(opt(monthly_payment=920, delta_monthly=100), FIN)    # 15.33% > 15%
+    assert not ok and "15.3% of your income (limit 15%)" in reason
 
 
 def test_rule2_surplus_share():
