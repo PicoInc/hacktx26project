@@ -224,6 +224,8 @@ Every option returns this exact shape (it becomes a card):
 
 Action kinds: `self_service` (buyout, refinance, extra miles, extension), `follow_up` (talk to an advisor, deferral, recall), `offer` (trade-in / new lease using `offers.json`).
 
+> **From NM-20:** every `assumptions` key is shown in the "Why this?" drawer through the `ASSUMPTIONS` label map in `frontend/src/components/WhyDrawer.jsx`, and every option `kind` gets its "How we calculated this" text from the `HOW` map there. When you add a key or a kind, tell Jose (or add the entry); unknown keys still render with a humanized name. `follow_up` actions open the TFS specialist scheduler in the UI, so use `follow_up` only for "a specialist takes it from here" actions.
+
 **Tasks:**
 - [x] Lease option generators (4)
 - [x] Loan option generators (5), relief options behind a flag
@@ -427,7 +429,7 @@ Normalization rules:
 - Explanation paragraph (2–3 sentences from the API)
 - Trade-offs as 1–3 bullets
 - Action button, styled by `action.kind`: `self_service` = solid red, `follow_up` = outline, `offer` = solid black with an "Offer" tag
-- "Why this?" link (opens the NM-20 drawer; a no-op for now)
+- "Why this?" link (opens the NM-20 drawer)
 
 The list shows the top 3 `recommendations`. Below it, a muted line: "We also considered N other options" (leads to NM-22).
 
@@ -449,7 +451,7 @@ The list shows the top 3 `recommendations`. Below it, a muted line: "We also con
 - **Components:** `RecommendationList({ recommendations, considered, onWhyThis })` shows the top 3 by `rank` and owns the toast. `RecommendationCard({ rec, top, onAction, onWhyThis })` renders one card. `Toast({ message, onDismiss })` is a reusable bottom-center toast that auto-dismisses after 4 s.
 - **"We also considered N other options":** N = `considered` items whose `id` isn't in the top 3 (p1 → 1). It links to `#all-options`, a wrapper `<div>` around `<ComparisonTable>` in `Dashboard.jsx`.
 - **Formatting:** `formatSignedWholeCurrency` in `format.js` rounds the delta to whole dollars (9.97 → "+$10"). The amber delta uses the new `--color-warning` / `--color-warning-bg` tokens. A `term_months` of 0 shows as "—".
-- **Not done yet:** `previous_rank` ("↑ was #2") isn't rendered (NM-19), and "Why this?" is a no-op until NM-20 passes `onWhyThis`.
+- **Not done yet:** `previous_rank` ("↑ was #2") isn't rendered (NM-19), and "Why this?" opens the drawer since NM-20. Also since NM-20, `follow_up` actions open the specialist scheduler instead of the toast.
 - **Until NM-15:** every persona shows p1's sample cards (Maya's Corolla), because `api.js` returns `recommendations_p1.json` for all customers.
 
 ---
@@ -491,6 +493,8 @@ Rules 1–2 skip options that *lower* the payment (relief options, refinance).
 5. Tie-break by `total_cost`, ascending
 
 **Human handoff:** if `monthly_surplus < 0`, or no option passes affordability, the #1 recommendation becomes a synthetic `talk_to_advisor` card (`action.kind: follow_up`) and the real options follow it.
+
+> **From NM-20:** the `talk_to_advisor` card's "Schedule a call" button (`follow_up`) opens the same scheduler as the header's "Talk to a TFS specialist" button, so the handoff looks identical wherever it starts. Its drawer says "No calculation; this is a conversation with a specialist."
 
 Every `considered` item gets `affordable: bool` and `rejection_reason: str | null`.
 
@@ -807,6 +811,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 
 **From NM-15:** every change to `lifeEvent` (via `onChange`) immediately re-requests recommendations. The cards switch to the loading skeleton until the response arrives, and `summary` is `null` meanwhile, so render no banner while it's `null`. Debounce the slider inside `WhatIfPanel` before calling `onChange`, since the Dashboard doesn't debounce for you.
 
+**From NM-20:** if the "Why this?" drawer is open during a What-if change, it keeps showing the same option (by `id`) with its new numbers, or closes if that option is no longer in the top cards. No work is needed in `WhatIfPanel`.
+
 **Tasks:**
 - [ ] Chips + slider + reset
 - [ ] Re-fetch with debounce (300 ms on the slider)
@@ -842,12 +848,22 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 **From NM-14:** the "AI cannot change numbers" line is now literally true. Every LLM sentence is checked by `services.llm.validate`, and any number not in the engine output swaps the text for the template. The drawer can show `explanation_source` honestly: "Explained by AI · numbers checked" for `"llm"`, "Standard explanation" for `"template"`.
 
 **Tasks:**
-- [ ] Drawer component
-- [ ] Handoff button + modal
+- [x] Drawer component
+- [x] Handoff button + modal
 
 **Acceptance criteria:**
 - [ ] Every card's drawer shows its own assumptions
 - [ ] The handoff is reachable from every screen in one click
+
+**What changed / what to know (read this if you build on NM-20):**
+- **Drawer:** `components/WhyDrawer.jsx` is a native `<dialog>` side panel (`components/useDialog.js` handles `showModal()`, Esc and backdrop clicks). It shows the explanation with its source ("Explained by AI · numbers checked" / "Standard explanation"), "What we assumed", "How we calculated this" and the footer line. `Dashboard.jsx` keeps only the open card's **id** (`whyId`) and looks the option up in the current response, so after a What-if change it shows the new numbers or closes if the option is gone.
+- **Assumptions are labelled through the `ASSUMPTIONS` map** in `WhyDrawer.jsx` (key → label + formatter). It covers all 17 keys the engine produces today. **A new engine key still renders** (humanized key, raw value), but add it to the map for a proper label and format.
+- **"How we calculated this" is static text per option `kind`** (the `HOW` map, from plan §5), plus "Effective monthly = payment + fuel + upfront ÷ 12 = …" filled with the option's own numbers. Kinds in `NO_EFFECTIVE_LINE` (deferral, advisor, recall) skip that line. A new `kind` needs a `HOW` entry. Sample JSON has no `kind`, so the drawer falls back to the id prefix.
+- **Handoff:** `components/HumanHandoff.jsx` exports `HandoffProvider` (wraps the app in `App.jsx` and renders the scheduler dialog and its toast once), `useHandoff()` → `{ openHandoff }` (callable from any component) and `HandoffButton`. Slots are the next 3 business days × 10:00 AM / 1:00 PM / 4:00 PM, computed from today (`nextBusinessDays`). Confirming shows "You're booked: … — a TFS specialist will call you."
+- **App bar:** `App.jsx` now renders a header on every screen: the "Next Move" wordmark (links to `/`) and the handoff button. Pages keep their own headings below it.
+- **Card actions:** `follow_up` actions (for example "Talk to a TFS specialist", "Schedule a call", "Request deferral") now **open the scheduler instead of a toast**, except kinds in `NOT_A_TFS_CALL` in `RecommendationList.jsx` (`recall_service`, see NM-27). Other kinds keep the `action.confirmation` toast.
+
+**Other tasks affected by NM-20 (each has a note in its own section):** NM-5 and NM-28 (new assumption keys and kinds need labels), NM-10 (follow-up actions no longer toast), NM-11 (the advisor card's "Schedule a call" opens the scheduler), NM-19 (the drawer follows What-if changes), NM-24 (wordmark and app bar exist; polish the dialogs), NM-26 (new strings to translate, `Intl` locale), NM-27 (recall actions are excluded from the scheduler; give them a toast and labels), NM-30 and NM-32 (demo and pitch moments).
 
 ### NM-21 · Explanation cache `E3` `P0` · 1 pt · **Jose**
 *As a demo, nothing may depend on Wi-Fi or LLM latency during judging.*
@@ -937,11 +953,12 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 *As judges, we should think "this could ship".*
 
 **Tasks:**
-- [ ] Consistent spacing and typography; Toyota-inspired palette (no official logos; use a text wordmark "Next Move")
+- [ ] Consistent spacing and typography; Toyota-inspired palette (no official logos; use a text wordmark "Next Move") *(NM-20 added the wordmark and an app bar on every screen in `App.jsx`)*
 - [ ] Empty, loading and error states on every screen (*NM-15 did the persona picker, the dashboard and the recommendations area: `ErrorState.jsx` with Retry, `RecommendationSkeleton.jsx`; check the remaining components, e.g. the What-if banner, comparison table and chart*)
 - [ ] Favicon, page titles, a nice persona-picker header
 - [ ] Check at 1280×800 and on the projector resolution (1920×1080)
 - [ ] Remove console errors and warnings
+- [ ] Polish NM-20's dialogs: the "Why this?" drawer and the specialist scheduler (spacing, mobile widths, focus order). Both are native `<dialog>`s styled in `app.css` (`dialog.drawer`, `dialog.modal`)
 - [ ] Debug badge: with `?debug=1` in the URL, show a tiny "AI" / "template" badge on each card from `explanation_source` (promised in NM-14's spec; the field is already in the API response and `RecommendationCard.jsx` doesn't render it yet). Handy for rehearsals to see which cards fell back (timeout, rate limit or a rejected number)
 
 **Acceptance criteria:**
@@ -977,6 +994,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 
 **Spec:**
 - EN/ES toggle in the header; UI strings in a simple dictionary
+  - *(From NM-20)* "The header" is now the app bar in `App.jsx`; put the toggle next to the handoff button. New strings to translate: `WhyDrawer.jsx` (section titles, `ASSUMPTIONS` labels, `HOW` text, source line, footer) and `HumanHandoff.jsx` (dialog, buttons, toast). Slot dates use `Intl.DateTimeFormat('en-US', …)`: pass `'es-US'` when Spanish is on.
 - `?lang=es` passed to the recommendations endpoint → the LLM explains in Spanish (numbers unchanged; the validator still applies, using Spanish number formats)
 - Warm the cache for `es` as well
 
@@ -999,6 +1017,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - NHTSA Recalls API: `https://api.nhtsa.gov/recalls/recallsByVehicle?make=TOYOTA&model={model}&modelYear={year}` (no key needed)
 - Cache responses to disk (demo-safe)
 - If any recalls exist, add a `recall_service` card (`action.kind: follow_up`, "Book a free recall repair") pinned above the rankings. It's safety, not a financial option.
+- *(From NM-20)* `follow_up` actions normally open the TFS specialist scheduler, but `recall_service` is excluded (`NOT_A_TFS_CALL` in `frontend/src/components/RecommendationList.jsx`), because a recall repair is booked with a dealer. So give the card an `action.confirmation` (NM-10 toast text), for example "Recall repair requested — your dealer will contact you to book it". The drawer already has `HOW` text for `recall_service` and skips the payment line. Add labels for any recall-specific `assumptions` keys (campaign number, component) to the `ASSUMPTIONS` map in `WhyDrawer.jsx`, or they show humanized raw keys.
 
 **From NM-8:** `build_profile()` already provides `vehicle.model` and `vehicle.year` for the NHTSA query.
 
@@ -1011,6 +1030,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 
 **Tasks:**
 - [ ] Edge cases: 0 months remaining, negative equity on trade-in (roll the negative equity into the new loan and say so in trade-offs), zero/negative surplus, income drop of 40%+, missing optional fields
+  - *(From NM-20)* if you add an assumption key for this (for example the rolled-in negative equity), add its label to the `ASSUMPTIONS` map in `frontend/src/components/WhyDrawer.jsx` so the drawer shows it properly.
 - [ ] Fuzz test: random life-event params for all personas; assert no exceptions and that all numbers are finite
 - [ ] Round money to 2 decimals at the API boundary only *(already done in `routes.py` by `round_money()`, NM-12; the engine should keep returning unrounded numbers)*
 
@@ -1041,6 +1061,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 **Blocked by:** NM-19, NM-20
 
 **Spec:** follow the plan's §12 script. Screen recording (QuickTime / OBS) at 1080p, with voice-over. Upload to YouTube as unlisted.
+
+**From NM-20:** for the responsible-AI moment, open "Why this?" on Maya's buyout (it shows APR 6.9%, a 60-month term, the residual and the purchase option fee, the formula and "AI cannot change numbers"). For the human-handoff moment, use the header's "Talk to a TFS specialist" → pick a slot → the confirmation toast.
 - 0:00 Hook → 0:15 Maya (lease end, buyout) → 0:45 Reyes (new baby → Highlander rejected) → 1:20 Daniel (equity → upgrade) → 1:40 responsible AI (validator, assumptions) → 1:50 business value
 
 **Acceptance criteria:**
@@ -1072,6 +1094,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - [ ] 5-slide deck (**Samu leads**, everyone reviews): Problem · Demo · Responsible AI (engine decides, AI explains, validator) · Business value (retention, upgrade revenue, fewer calls) · Team
 - [ ] Each person rehearses the 2-minute pitch once out loud
 - [ ] Prepare answers: "Where does the data come from?", "What if the LLM is wrong?", "How would TFS deploy this?", "Why these affordability thresholds?"
+  - *"Can I trust the numbers?"* (NM-20): open "Why this?" on any card. Every assumption the engine used is listed, plus the formula and the effective-monthly sum, and a human is one click away from every screen.
   - *"What if the LLM is wrong?"* (NM-14): the LLM never computes. It gets pre-calculated, pre-formatted numbers, and a validator checks every digit it writes against the engine's output. One unknown number means that card shows a deterministic template instead. Live demo: `pytest backend/tests/test_validator.py -v` shows "only $199/mo at 2.9%" being rejected. Limit to admit if asked: numbers spelled out as words aren't checked
   - *"Where does the data come from?"* (NM-6/7): synthetic Toyota contracts and a vehicle catalog we wrote, plus bank data shaped exactly like Capital One's Nessie API, generated by a seeded script. One env var (`DATA_MODE`) switches to live Nessie
 - [ ] Laptop setup for judging: charger, `CACHE_ONLY=true`, browser zoom tested, tabs pre-opened
