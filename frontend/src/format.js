@@ -1,3 +1,4 @@
+
 // Display-only helpers: the frontend formats money, it never computes it.
 // stripIfInteger shows $4,300 for whole amounts and $284.37 when there are cents.
 const currency = new Intl.NumberFormat('en-US', {
@@ -11,12 +12,21 @@ const signedCurrency = new Intl.NumberFormat('en-US', {
   trailingZeroDisplay: 'stripIfInteger',
   signDisplay: 'exceptZero',
 })
+const signedWholeCurrency = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+  signDisplay: 'exceptZero',
+})
 const number = new Intl.NumberFormat('en-US')
 
 export const formatCurrency = (n) => currency.format(n)
 
 // "+$4,300" / "−$1,200" (Intl uses a hyphen-minus; swap in a true minus sign)
 export const formatSignedCurrency = (n) => signedCurrency.format(n).replace('-', '−')
+
+// Same, rounded to whole dollars for at-a-glance deltas: 9.97 → "+$10"
+export const formatSignedWholeCurrency = (n) => signedWholeCurrency.format(n).replace('-', '−')
 
 export const formatNumber = (n) => number.format(n)
 

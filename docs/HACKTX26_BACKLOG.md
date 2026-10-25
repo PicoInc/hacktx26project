@@ -212,9 +212,10 @@ Every option returns this exact shape (it becomes a card):
   "equity_used": 0,
   "tradeoffs": ["Avoids the $1,275 over-mileage fee", "You own the car; repairs after warranty are on you"],
   "assumptions": { "apr": 6.9, "term_months": 60, "residual": 14600, "fees": 300, "source": "synthetic" },
-  "action": { "kind": "self_service", "label": "Start buyout" }
+  "action": { "kind": "self_service", "label": "Start buyout", "confirmation": "Buyout started — a TFS specialist will confirm within 1 business day" }
 }
 ```
+> **Added in NM-10:** `action.confirmation` is the one-sentence toast the card shows after the button is clicked. It's in `docs/contract.md` and both `recommendations_p1.json` samples. Until `options.py` emits it, the card falls back to "`{label}` — a TFS specialist will follow up within 1 business day".
 `effective_monthly = monthly_payment + fuel_monthly + upfront_cost / 12`. This is the "first-year monthly burden" used for ranking in NM-11.
 
 Action kinds: `self_service` (buyout, refinance, extra miles, extension), `follow_up` (talk to an advisor, deferral, recall), `offer` (trade-in / new lease using `offers.json`).
@@ -224,6 +225,7 @@ Action kinds: `self_service` (buyout, refinance, extra miles, extension), `follo
 - [ ] Loan option generators (5), relief options behind a flag
 - [ ] Trade-offs: 1–3 short strings per option, written from the numbers (no LLM)
 - [ ] Assumptions dict on every option
+- [ ] `action.confirmation` on every option: one customer-facing sentence about what happens next, no numbers (added by NM-10; see the p1 sample for wording)
 - [ ] Tests per persona (use the fixtures in Appendix B)
 
 **Acceptance criteria:**
@@ -371,7 +373,7 @@ Normalization rules:
 
 **How to verify:** `npm run dev` → click through all 3 personas (fake sample data for p2/p3 is fine at this stage).
 
-### NM-10 · Recommendation cards (static) `E4` `P0` · 3 pts · **Jose**
+### ✅ NM-10 · Recommendation cards (static) `E4` `P0` · 3 pts · **Jose**
 *As a customer, I want 2–3 clear cards telling me what to do.*
 
 **Context:** The card is the product. It must answer "what should I do, what does it cost me, why, and what do I click" without scrolling.
@@ -393,16 +395,24 @@ Normalization rules:
 The list shows the top 3 `recommendations`. Below it, a muted line: "We also considered N other options" (leads to NM-22).
 
 **Tasks:**
-- [ ] Write `recommendations_p1.json` by hand using the NM-5 option shape plus `rank` and `explanation`
-- [ ] Card + list components
-- [ ] Action button click → `alert()` / toast saying what would happen ("Buyout started — a TFS specialist will confirm within 1 business day")
+- [x] Write `recommendations_p1.json` by hand using the NM-5 option shape plus `rank` and `explanation`
+- [x] Card + list components
+- [x] Action button click → `alert()` / toast saying what would happen ("Buyout started — a TFS specialist will confirm within 1 business day")
 
 **Acceptance criteria:**
-- [ ] 3 cards render from the sample; the #1 card is visually dominant
-- [ ] Each action kind looks different
-- [ ] All fields come from JSON; nothing is hard-coded in JSX
+- [x] 3 cards render from the sample; the #1 card is visually dominant
+- [x] Each action kind looks different
+- [x] All fields come from JSON; nothing is hard-coded in JSX
 
 **How to verify:** open p1's dashboard → 3 cards below the summary row.
+
+**What changed (read this if you build on NM-10):**
+- **Contract change:** `action` is now `{ kind, label, confirmation }`. `confirmation` is the toast text. Updated in `docs/contract.md`, `docs/sample_responses/recommendations_p1.json` and `frontend/src/sample/recommendations_p1.json` (the two samples are kept identical). Samu: `options.py` needs to emit it (task added to NM-5).
+- **Layout:** #1 spans the full width (numbers on the left, explanation + action on the right) with a red border and a "Best move" ribbon; #2 and #3 sit side by side below. Everything is one column under 900px.
+- **Components:** `RecommendationList({ recommendations, considered, onWhyThis })` shows the top 3 by `rank` and owns the toast. `RecommendationCard({ rec, top, onAction, onWhyThis })` renders one card. `Toast({ message, onDismiss })` is a reusable bottom-center toast that auto-dismisses after 4 s.
+- **"We also considered N other options":** N = `considered` items whose `id` isn't in the top 3 (p1 → 1). It links to `#all-options`, a wrapper `<div>` around `<ComparisonTable>` in `Dashboard.jsx`.
+- **Formatting:** `formatSignedWholeCurrency` in `format.js` rounds the delta to whole dollars (9.97 → "+$10"). The amber delta uses the new `--color-warning` / `--color-warning-bg` tokens. A `term_months` of 0 shows as "—".
+- **Not done yet:** `previous_rank` ("↑ was #2") isn't rendered (NM-19), and "Why this?" is a no-op until NM-20 passes `onWhyThis`.
 
 ---
 
@@ -481,6 +491,7 @@ Every `considered` item gets `affordable: bool` and `rejection_reason: str | nul
 - [ ] Call `engine.recommend.recommend(profile, life_event)`
 - [ ] Call Jose's `services.llm.explain_all(recommendations, profile, life_event)` and copy `text` → `explanation`, `source` → `explanation_source` on each recommendation. Until NM-13 lands, Jose pushes a stub that returns template text, so this works from the start
 - [ ] Also return `finances_after_event` (from Samu's `recommend()` output) so the finance snapshot can update during What-if
+- [ ] Pass each option's `action` through unchanged, including `action.confirmation` (added by NM-10; the card shows it as the click toast)
 
 **Acceptance criteria:**
 - [ ] `curl -X POST .../p1/recommendations -H 'Content-Type: application/json' -d '{"life_event":null}'` returns 3 ranked recommendations with p1's numbers
@@ -574,8 +585,9 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 
 **Tasks:**
 - [ ] Proxy + fetch calls
-- [ ] Loading + error states
+- [ ] Loading + error states (the card skeletons replace `<RecommendationList>` in `Dashboard.jsx` while loading)
 - [ ] Remove any remaining hard-coded data from components
+- [ ] Check that the live response carries `action.confirmation` (NM-10 contract change). If it doesn't, the toast quietly falls back to generic text, so check the wording on each card
 
 **Acceptance criteria:**
 - [ ] p1 flows picker → dashboard → live cards with LLM explanations
@@ -676,7 +688,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - Income drop shows a slider (10–40%, default 20); other events use defaults
 - Selecting a chip → `getRecommendations(id, lifeEvent)` → cards re-render; "Reset" clears it
 - Banner above the cards with `life_event_applied` ("Income down 20% → monthly surplus now −$340")
-- Changed-rank indicator: when a life event is applied, `recommend()` adds `previous_rank` (baseline rank, or `null` if new) to each recommendation; Jose's card renders "↑ was #2" / "New" from it (one line on his side; tell him when the field lands)
+- Changed-rank indicator: when a life event is applied, `recommend()` adds `previous_rank` (baseline rank, or `null` if new) to each recommendation; Jose's card renders "↑ was #2" / "New" from it (one line on his side, in the `rec-head` row of `RecommendationCard.jsx`; tell him when the field lands)
 - Finance snapshot reflects the event: `recommend()` returns `finances_after_event`; Jose's `FinanceSnapshot` shows it when present
 
 **Tasks:**
@@ -708,6 +720,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
   - "How we calculated this": monthly payment = …, effective monthly = payment + fuel + upfront/12 (static text from the plan)
   - "Calculated by our finance engine · explained by AI · AI cannot change numbers"
 - A persistent "Talk to a TFS specialist" button in the header on every screen → modal with fake scheduling (pick a time slot → confirmation toast)
+
+**Already in place from NM-10:** every card's "Why this?" button calls `onWhyThis(rec)` with the full option (`explanation`, `assumptions`, numbers). Hold the selected option in `Dashboard.jsx` and pass `onWhyThis` to `<RecommendationList>`. For the handoff's confirmation toast, reuse `components/Toast.jsx` (`message`, `onDismiss`).
 
 **Tasks:**
 - [ ] Drawer component
@@ -750,6 +764,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 **Files:** `frontend/src/components/ComparisonTable.jsx`
 
 **Spec:** a collapsible section "All options we considered (N)". Columns: Option · Monthly · Δ vs today · Upfront · Total · Status. Status is a green "Affordable" or a gray "Not recommended" with `rejection_reason` as a tooltip or second line. Sorted by rank.
+
+**From NM-10:** the cards' "We also considered N other options" link points to `#all-options`, a `<div>` that `Dashboard.jsx` already wraps around `<ComparisonTable>`, so you don't need to add an id. `considered` includes the top 3 as well as the rejected options. Rejected items carry only `id, title, monthly_payment, delta_monthly, upfront_cost, total_cost, affordable, rejection_reason` (no `rank`), so sort them after the ranked ones.
 
 **Acceptance criteria:**
 - [ ] Shows every `considered` item, with reasons for rejected ones
