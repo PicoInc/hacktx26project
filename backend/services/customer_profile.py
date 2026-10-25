@@ -18,7 +18,7 @@ class CustomerNotFound(Exception):
 
 def load_json(filename):
     """Opens a file from the data folder and returns its contents."""
-    with open(DATA_FOLDER / filename) as file:
+    with open(DATA_FOLDER / filename, encoding="utf-8") as file:
         return json.load(file)
 
 

@@ -32,5 +32,5 @@ RELIEF_SURPLUS_MIN = 0
 
    # Vehicle catalog: loaded from backend/data/vehicle_catalog.json (single source of truth)
 _DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-with open(_DATA_DIR / "vehicle_catalog.json") as _file:
+with open(_DATA_DIR / "vehicle_catalog.json", encoding="utf-8") as _file:
     VEHICLE_CATALOG = json.load(_file)["vehicles"]
