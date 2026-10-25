@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getDashboard, getPersonas } from '../api.js'
+import ErrorState from '../components/ErrorState.jsx'
 
 export default function PersonaPicker() {
-  const [personas, setPersonas] = useState([])
+  // null while loading, { list } or { error } once done
+  const [result, setResult] = useState(null)
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     let ignore = false
-    // personas.json has no vehicle, so pull it from each customer's dashboard
+    // /personas has no vehicle, so pull it from each customer's dashboard
     getPersonas()
       .then((list) =>
         Promise.all(
@@ -17,13 +20,17 @@ export default function PersonaPicker() {
           }),
         ),
       )
-      .then((list) => {
-        if (!ignore) setPersonas(list)
-      })
+      .then((list) => !ignore && setResult({ list }))
+      .catch((error) => !ignore && setResult({ error }))
     return () => {
       ignore = true
     }
-  }, [])
+  }, [attempt])
+
+  const retry = () => {
+    setResult(null)
+    setAttempt((n) => n + 1)
+  }
 
   return (
     <main className="page">
@@ -31,16 +38,20 @@ export default function PersonaPicker() {
         <h1>Welcome back</h1>
         <p className="muted">Choose a customer to sign in as.</p>
       </div>
-      <div className="grid-3">
-        {personas.map((p) => (
-          <Link key={p.customer_id} to={`/customer/${p.customer_id}`} className="card persona-card">
-            <h2 className="persona-name">{p.name}</h2>
-            <span className="persona-vehicle">{p.vehicleLabel}</span>
-            <span className="muted">{p.tagline}</span>
-            <span className="persona-cta">Sign in →</span>
-          </Link>
-        ))}
-      </div>
+      {!result && <p className="muted">Loading customers…</p>}
+      {result?.error && <ErrorState title="Couldn't load customers" onRetry={retry} />}
+      {result?.list && (
+        <div className="grid-3">
+          {result.list.map((p) => (
+            <Link key={p.customer_id} to={`/customer/${p.customer_id}`} className="card persona-card">
+              <h2 className="persona-name">{p.name}</h2>
+              <span className="persona-vehicle">{p.vehicleLabel}</span>
+              <span className="muted">{p.tagline}</span>
+              <span className="persona-cta">Sign in →</span>
+            </Link>
+          ))}
+        </div>
+      )}
     </main>
   )
 }
