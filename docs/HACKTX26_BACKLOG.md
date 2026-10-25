@@ -331,6 +331,8 @@ Normalization rules:
 - [ ] Flask app factory, CORS (`flask-cors`), JSON error handler
 - [ ] Both routes, composed from `toyota_profiles.json` + `get_financial_profile()`
 - [ ] Ask Samu for `loan_balance` (or temporarily stub it, then swap in NM-4)
+- [ ] **Keep these lines in `create_app()`** (added by Jose in NM-13): `from services.llm import warm_up` then `warm_up()`. They open the LLM connection in the background at startup so the first recommendations request is fast. They do nothing without `LLM_API_KEY`, and they need no other change
+- [ ] `backend/.env` needs `LLM_API_KEY` and `LLM_MODEL=gemini-3.5-flash-lite` for real explanations (see `.env.example`); without them the API still works and returns template text
 
 **Acceptance criteria:**
 - [ ] `curl localhost:5000/api/personas` returns 3 personas
@@ -469,6 +471,8 @@ Every `considered` item gets `affordable: bool` and `rejection_reason: str | nul
 - [ ] p3 → #1 `trade_in_upgrade` (goal `newer_vehicle`), #2 `refinance`, #3 `keep`
 - [ ] Every rejected option has a non-empty `rejection_reason`
 
+> **Open issue found during NM-13 (Samu):** on `dev`, `recommend(P1)` returns only `lease_buyout`, so two of your own tests fail: `test_guardrails.py::test_p1_maya` and `::test_contract_fields_and_ranks`. `buy_miles_new_lease` ($324.20 on a $2,100 income) is rejected by rule 1 with "Payment would be 15% of your income (limit 15%)". The rule is working as specified ($324.20 / $2,100 = 15.4%, over the 15% limit), but the message rounds to a whole number, so it reads "15% (limit 15%)". The criteria above and NM-18 expect it to be #2, and NM-10's sample JSON shows 3 cards for p1, so the persona numbers and the rule disagree. Per NM-18, fix the data first (p1's income or the new-lease terms) and change the constant only if the data can't fix it, and tell the team. Also show the percentage to one decimal ("15.4%"). The LLM repeats `rejection_reason` to the customer, so this wording is customer-facing.
+
 **How to verify:** `pytest backend/engine/tests -v`, then print `recommend(profile)` for each persona.
 
 ### NM-12 · Recommendations endpoint `E2` `P0` · 2 pts · **Rodrigo**
@@ -497,10 +501,11 @@ Every `considered` item gets `affordable: bool` and `rejection_reason: str | nul
 **Acceptance criteria:**
 - [ ] `curl -X POST .../p1/recommendations -H 'Content-Type: application/json' -d '{"life_event":null}'` returns 3 ranked recommendations with p1's numbers
 - [ ] An invalid life event returns 400 with the allowed list
+- [ ] *(NM-13 end-to-end check)* with `LLM_API_KEY` set, the p1 response has `explanation_source: "llm"` on each card and the text uses p1's numbers; with the key unset or wrong, the response is still 200 and uses `"template"`. Use `gemini-3.5-flash-lite`: free tier is 5 requests per minute, so wait between curls
 
 **How to verify:** the curl above, and compare against Samu's printed `recommend()` output.
 
-### NM-13 · LLM explanations `E3` `P0` · 3 pts · **Jose**
+### ✅ NM-13 · LLM explanations `E3` `P0` · 3 pts · **Jose**
 *As a customer, I want a plain-English reason for each recommendation.*
 
 **Context:** This is the only place AI is used, and it's limited to wording. It turns the option JSON into 2–3 friendly sentences. Judges should see that the AI explains and never decides.
@@ -534,8 +539,10 @@ Pass the model only the fields it needs: title, monthly_payment, delta_monthly, 
 - [x] `.env`: `LLM_API_KEY`, `LLM_MODEL`
 
 **Acceptance criteria:**
-- [ ] p1's 3 cards show sensible explanations that use their numbers *(checked by calling `explain_all` directly on p1's options and on p2 + `new_baby`; the endpoint check waits for NM-12)*
-- [x] A timeout or error falls back to the template (NM-14) and the endpoint still returns 200 *(`explain_all` never raises; covered by `backend/tests/test_llm.py`; the endpoint part waits for NM-12)*
+- [x] p1's 3 cards show sensible explanations that use their numbers *(checked by calling `explain_all` directly on p1's options and on p2 + `new_baby`; the same check through the real endpoint is an NM-12 acceptance criterion)*
+- [x] A timeout or error falls back to the template (NM-14) and the endpoint still returns 200 *(`explain_all` never raises; covered by `backend/tests/test_llm.py`; the endpoint part is an NM-12 acceptance criterion)*
+
+**Other tasks affected by NM-13 (each has a note in its own section):** NM-8 and NM-12 (Rodrigo: `app.py` now calls `warm_up()`; round money before `explain_all`), NM-11 (Samu: p1 gets only one recommendation), NM-14 and NM-21 (Jose: validator hook, cache rules), NM-18 (check the explanations).
 
 **How to verify:** call the endpoint for p1 and read the explanations out loud. Do they sound like a helpful TFS rep?
 
@@ -681,7 +688,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 **Tasks:**
 - [ ] Integration test: for every row of the Appendix B "expected outcomes" table, assert the #1 option id
 - [ ] If an assertion fails, adjust **data**, not rules (change the constants only if the data can't fix it, and tell the team)
-- [ ] Sanity-read every explanation for every persona/event combo
+- [ ] Sanity-read every explanation for every persona/event combo (NM-13 notes: the model sometimes adds small unsupported claims, and it repeats `rejection_reason` verbatim, so reword confusing reasons in the engine, not the prompt)
+- [ ] Re-check p1 once Samu fixes the NM-11 issue above: the engine must return 3 ranked cards, as the demo script expects
 
 **Acceptance criteria:**
 - [ ] `test_personas.py` passes for all 8 persona/event combinations in Appendix B
