@@ -23,10 +23,35 @@ a { color: inherit; }
   gap: var(--space-2);
   margin-bottom: var(--space-3);
 }
-.header h1 { margin: 0; font-size: 28px; }
+.header h1 { margin: 0; font-size: clamp(32px, 4vw, 44px); font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
 .header-left { display: flex; flex-direction: column; gap: var(--space-1); }
-.back-link { font-size: 14px; color: var(--color-muted); text-decoration: none; }
-.back-link:hover { color: var(--color-red); }
+/* A real control, not a footnote: same pill as the What-if chips */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  margin-bottom: var(--space-1);
+  padding: 6px 14px 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-white);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+.back-link svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--color-red);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.back-link:hover { border-color: var(--color-ink); }
+.back-link:focus-visible { outline: 3px solid var(--color-ink); outline-offset: 2px; }
 
 /* Cards */
 .grid-3 {
@@ -50,13 +75,24 @@ a { color: inherit; }
   justify-content: space-between;
   min-height: var(--space-3);
   margin: 0 0 var(--space-2);
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 16px;
+  font-weight: 700;
   color: var(--color-muted);
 }
-.card-headline { margin: 0 0 var(--space-2); font-size: 22px; font-weight: 700; }
+.card-headline { margin: 0 0 var(--space-2); font-size: 24px; font-weight: 800; line-height: 1.2; }
+
+/* Car, contract and money: one panel split by rules, not three cards */
+.snapshot {
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-white);
+}
+.snapshot > .card { border: 0; border-radius: 0; background: none; }
+.snapshot > .card + .card { border-left: 1px solid var(--color-border); }
+@media (max-width: 900px) {
+  .snapshot > .card + .card { border-left: 0; border-top: 1px solid var(--color-border); }
+}
 
 /* Label/value rows */
 .stats { display: grid; gap: var(--space-1); margin: 0; }
@@ -78,10 +114,9 @@ a { color: inherit; }
   display: inline-block;
   padding: 4px var(--space-1);
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  text-transform: capitalize; /* contract types arrive lowercase ("lease") */
   background: var(--color-ink);
   color: var(--color-white);
 }
@@ -126,45 +161,58 @@ a { color: inherit; }
 
 /* Recommendations */
 .section { margin-top: var(--space-4); }
-.section h2 { margin: 0 0 var(--space-2); font-size: 20px; }
+.section h2 { margin: 0 0 var(--space-2); font-size: 28px; font-weight: 800; letter-spacing: -0.01em; }
 
-.rec-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-3);
-}
+/* Every card is horizontal: numbers on the left, the why + action on the right.
+   The thick left edge is the road from the landing page: red for the best move, gray for the rest. */
+.rec-list { display: grid; gap: var(--space-3); }
 .rec-card {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-/* #1 spans the row, with numbers on the left and the why + action on the right */
-.rec-card-top {
-  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
   gap: var(--space-4);
-  border: 2px solid var(--color-red);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-left: 10px solid var(--road);
 }
 @media (max-width: 900px) {
-  .rec-list { grid-template-columns: 1fr; }
-  .rec-card-top { grid-template-columns: 1fr; gap: var(--space-2); }
+  .rec-card { grid-template-columns: 1fr; gap: var(--space-2); }
 }
+
+/* #1 is the page's one bold element: asphalt, like the landing route board */
+.rec-card-top {
+  border-color: var(--color-ink);
+  border-left-color: var(--color-red);
+  background: var(--color-ink);
+  color: var(--color-white);
+}
+.rec-card-top .badge { background: var(--color-red); }
+.rec-card-top .badge-offer { background: var(--color-white); }
+.rec-card-top .muted,
+.rec-card-top .rec-per,
+.rec-card-top .rec-tradeoffs,
+.rec-card-top .stat dt,
+.rec-card-top .link-button { color: var(--on-dark-muted); }
+.rec-card-top .link-button:hover { color: var(--color-white); }
+.rec-card-top .link-button:focus-visible,
+.rec-card-top .btn:focus-visible { outline-color: var(--color-white); }
+.rec-card-top .rec-stats { border-top-color: #3d3d3d; }
+.rec-card-top .btn-dark { background: var(--color-white); color: var(--color-ink); }
+.rec-card-top .btn-outline { color: var(--color-white); border-color: var(--color-white); }
 
 .ribbon {
   position: absolute;
-  top: 0;
+  top: var(--space-3);
   right: var(--space-3);
-  padding: 4px var(--space-2);
-  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 2px var(--space-1);
+  border-radius: 999px;
   background: var(--color-red);
   color: var(--color-white);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+}
+/* Keep the explanation clear of the tag */
+.rec-card-top .rec-body { padding-top: var(--space-4); }
+@media (max-width: 900px) {
+  .rec-card-top .rec-body { padding-top: 0; }
 }
 
 .rec-head { display: flex; gap: var(--space-1); margin-bottom: var(--space-1); }
@@ -213,6 +261,26 @@ a { color: inherit; }
 .btn-primary { background: var(--color-red); color: var(--color-white); }
 .btn-dark { background: var(--color-ink); color: var(--color-white); }
 .btn-outline { background: transparent; color: var(--color-ink); border-color: var(--color-ink); }
+/* "Why this?": a soft filled button, so it never competes with the action's red, black or outline style */
+.btn-why {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--color-gray);
+  color: var(--color-ink);
+  border-color: var(--color-gray);
+}
+.btn-why:hover { opacity: 1; border-color: var(--color-ink); }
+.btn-why-icon {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.rec-card-top .btn-why { background: #333333; border-color: #333333; color: var(--color-white); }
+.rec-card-top .btn-why:hover { border-color: var(--color-white); }
 .link-button {
   padding: 0;
   border: 0;
@@ -258,26 +326,52 @@ a { color: inherit; }
 }
 
 /* Persona picker */
-.picker-intro { margin-bottom: var(--space-4); }
-.picker-intro h1 { margin: 0 0 var(--space-1); font-size: 32px; }
-.picker-intro p { margin: 0; }
-.persona-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-height: 200px;
+.picker-intro { margin: var(--space-3) 0 var(--space-5); }
+.picker-intro h1 {
+  margin: 0 0 var(--space-1);
+  font-size: clamp(34px, 5vw, 56px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+.picker-intro p { margin: 0; font-size: 18px; }
+
+/* Customers as roads, like the landing page lanes: the edge turns red on the one you're about to open */
+.persona-list { margin: 0; padding: 0; list-style: none; border-top: 2px solid var(--color-ink); }
+.persona-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 112px;
+  padding-right: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
   text-decoration: none;
-  border-top: 4px solid var(--color-red);
-  transition: box-shadow 0.15s, transform 0.15s;
+  transition: background 0.15s;
 }
-.persona-card:hover,
-.persona-card:focus-visible {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
+.persona-row::before { content: ''; align-self: stretch; background: var(--road); transition: background 0.15s; }
+.persona-row:hover,
+.persona-row:focus-visible { background: var(--color-white); }
+.persona-row:hover::before,
+.persona-row:focus-visible::before { background: var(--color-red); }
+.persona-row:focus-visible { outline: 3px solid var(--color-ink); outline-offset: 2px; }
+.persona-name { margin: 0; font-size: 26px; font-weight: 800; line-height: 1.15; }
+.persona-vehicle { display: block; font-weight: 700; }
+.persona-tagline { display: block; color: var(--color-muted); }
+.persona-cta { font-weight: 700; color: var(--color-red); white-space: nowrap; }
+@media (max-width: 700px) {
+  .persona-row {
+    grid-template-columns: 10px minmax(0, 1fr);
+    gap: 4px var(--space-2);
+    padding: var(--space-2) 0;
+  }
+  .persona-row::before { grid-row: 1 / 4; }
+  .persona-row > * { grid-column: 2; }
 }
-.persona-name { margin: 0; font-size: 24px; }
-.persona-vehicle { font-weight: 600; }
-.persona-cta { margin-top: auto; color: var(--color-red); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) {
+  .persona-row,
+  .persona-row::before { transition: none; }
+}
 
 /* Loading and error states (NM-15) */
 .error-state {
@@ -294,7 +388,8 @@ a { color: inherit; }
 .error-title { margin: 0; font-weight: 600; color: var(--color-ink); }
 
 .skeleton-card { pointer-events: none; }
-.skeleton-card.rec-card-top { border-color: var(--color-border); box-shadow: none; }
+.skeleton-card,
+.skeleton-card.rec-card-top { border-color: var(--color-border); background: var(--color-white); }
 .skeleton {
   border-radius: 4px;
   background: linear-gradient(90deg, var(--color-gray) 25%, var(--color-border) 50%, var(--color-gray) 75%);
@@ -405,19 +500,15 @@ dialog.modal {
 
 .drawer-kicker {
   margin: 0 0 4px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
   color: var(--color-red);
 }
 .drawer-vehicle { margin: 4px 0 0; }
 .drawer-section { padding-top: var(--space-2); border-top: 1px solid var(--color-border); }
 .drawer-section h3 {
   margin: 0 0 var(--space-1);
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 16px;
   color: var(--color-muted);
 }
 .drawer-section p { margin: 0 0 var(--space-1); line-height: 1.5; }

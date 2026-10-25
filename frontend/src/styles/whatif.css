@@ -25,7 +25,10 @@
 }
 
 .whatif-chip {
-  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 8px 16px 8px 12px;
   border: 1px solid var(--color-border);
   border-radius: 999px;
   background: var(--color-white);
@@ -38,6 +41,19 @@
 }
 
 .whatif-chip:hover { border-color: var(--color-ink); }
+
+.whatif-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* The pictogram picks up the brand red until the chip is on */
+.whatif-chip:not(.is-active) .whatif-icon { stroke: var(--color-red); }
 
 .whatif-chip.is-active {
   background: var(--color-ink);

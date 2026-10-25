@@ -51,7 +51,12 @@ export default function RecommendationCard({ rec, top = false, onAction, onWhyTh
           <button type="button" className={KIND_CLASS[action.kind]} onClick={() => onAction(rec)}>
             {action.label}
           </button>
-          <button type="button" className="link-button" onClick={() => onWhyThis?.(rec)}>
+          <button type="button" className="btn btn-why" onClick={() => onWhyThis?.(rec)}>
+            <svg className="btn-why-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9.5" />
+              <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" />
+              <circle cx="12" cy="17.25" r="0.6" />
+            </svg>
             Why this?
           </button>
         </div>

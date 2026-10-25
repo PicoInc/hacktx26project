@@ -1,12 +1,8 @@
-/* Landing page: tokens.css variables, layered on app.css (.btn, .muted).
-   Overpass is the only face here: it descends from highway signage, which suits the road in the logo. */
+/* Landing page: tokens.css variables, layered on app.css (.btn, .muted) */
 .landing {
   --lane-h: 104px; /* keep in sync with LANE_H in Landing.jsx */
-  --road: #333333;
-  --on-dark-muted: #bdbdbd;
   --ok-on-dark: #6fd39a;
   padding-bottom: var(--space-4);
-  font-family: 'Overpass Variable', var(--font);
   font-size: 17px;
   line-height: 1.55;
 }

@@ -35,22 +35,27 @@ export default function PersonaPicker() {
   return (
     <main className="page">
       <div className="picker-intro">
-        <h1>Welcome back</h1>
-        <p className="muted">Choose a customer to sign in as.</p>
+        <h1>Choose a customer</h1>
+        <p className="muted">Each one is a demo customer with synthetic data. Open one to see their dashboard.</p>
       </div>
       {!result && <p className="muted">Loading customers…</p>}
       {result?.error && <ErrorState title="Couldn't load customers" onRetry={retry} />}
       {result?.list && (
-        <div className="grid-3">
+        <ul className="persona-list">
           {result.list.map((p) => (
-            <Link key={p.customer_id} to={`/customer/${p.customer_id}`} className="card persona-card">
-              <h2 className="persona-name">{p.name}</h2>
-              <span className="persona-vehicle">{p.vehicleLabel}</span>
-              <span className="muted">{p.tagline}</span>
-              <span className="persona-cta">Sign in →</span>
-            </Link>
+            <li key={p.customer_id}>
+              <Link to={`/customer/${p.customer_id}`} className="persona-row">
+                <h2 className="persona-name">{p.name}</h2>
+                <span>
+                  <span className="persona-vehicle">{p.vehicleLabel}</span>
+                  {/* Taglines arrive as "A · B · C"; read them as a sentence */}
+                  <span className="persona-tagline">{p.tagline.split(' · ').join(', ')}</span>
+                </span>
+                <span className="persona-cta">Open dashboard</span>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </main>
   )

@@ -1,11 +1,39 @@
 import { useEffect, useRef, useState } from 'react'
 import '../styles/whatif.css'
 
+// Line pictograms on a 24px grid, drawn in currentColor so they follow the chip's state
+const ICONS = {
+  // Pram: bowl, hood, two wheels (no handle, which reads as a shopping cart)
+  new_baby: (
+    <>
+      <path d="M4 11a7.5 5.5 0 0 0 15 0Z" />
+      <path d="M11.5 11V3.5a7.5 7.5 0 0 1 7.5 7.5" />
+      <circle cx="8" cy="20" r="2" />
+      <circle cx="15" cy="20" r="2" />
+    </>
+  ),
+  // Falling trend line
+  income_drop: (
+    <>
+      <path d="m3 7 6 6 4-4 8 8" />
+      <path d="M21 11v6h-6" />
+    </>
+  ),
+  // A winding route from start to destination
+  longer_commute: (
+    <>
+      <circle cx="5" cy="19" r="2" />
+      <path d="M7 19h6a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h6" />
+      <circle cx="19" cy="7" r="2" />
+    </>
+  ),
+}
+
 // Event types must match backend/engine/events.py ALLOWED_EVENTS
 const EVENTS = [
-  { type: 'new_baby', icon: '👶', label: 'New baby' },
-  { type: 'income_drop', icon: '📉', label: 'Income drop' },
-  { type: 'longer_commute', icon: '🚗', label: 'Longer commute' },
+  { type: 'new_baby', label: 'New baby' },
+  { type: 'income_drop', label: 'Income drop' },
+  { type: 'longer_commute', label: 'Longer commute' },
 ]
 
 const PCT_MIN = 10
@@ -67,7 +95,10 @@ export default function WhatIfPanel({ value, onChange, summary }) {
               aria-pressed={active === e.type}
               onClick={() => select(e.type)}
             >
-              <span aria-hidden="true">{e.icon}</span> {e.label}
+              <svg className="whatif-icon" viewBox="0 0 24 24" aria-hidden="true">
+                {ICONS[e.type]}
+              </svg>
+              {e.label}
             </button>
           ))}
         </div>
