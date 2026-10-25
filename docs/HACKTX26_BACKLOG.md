@@ -225,6 +225,7 @@ Every option returns this exact shape (it becomes a card):
 Action kinds: `self_service` (buyout, refinance, extra miles, extension), `follow_up` (talk to an advisor, deferral, recall), `offer` (trade-in / new lease using `offers.json`).
 
 > **From NM-20:** every `assumptions` key is shown in the "Why this?" drawer through the `ASSUMPTIONS` label map in `frontend/src/components/WhyDrawer.jsx`. When you add a key, tell Jose (or add the entry); unknown keys still render with a humanized name. `follow_up` actions open the TFS specialist scheduler in the UI, so use `follow_up` only for "a specialist takes it from here" actions.
+> **From NM-21:** the explanation cache is keyed on the exact numbers, titles, trade-offs and action labels you produce here. Changing any of them (or a persona's data, in NM-6/NM-18) makes the affected cached explanations miss, so under `CACHE_ONLY=true` those cards fall back to templates until someone re-runs `python scripts/warm_cache.py` and commits `backend/cache/`. It's a 7-minute job; do it after your last engine change, not after each one.
 
 **Tasks:**
 - [x] Lease option generators (4)
@@ -603,7 +604,7 @@ Pass the model only the fields it needs: title, monthly_payment, delta_monthly, 
 - **One call per request, with a hard 6 s wait:** the Gemini API rejects deadlines under 10 s, so the SDK timeout is 10 s (`HTTP_TIMEOUT_MS`) and `explain_all` stops waiting after `TIMEOUT_S = 6` (`_call_with_deadline`, a worker thread). With flash-lite and `thinking_level="minimal"`, a call takes about 1 s once warmed (about 3.4 s cold). Slow-network runs can still pass 6 s and fall back to templates, so the cache (NM-21) is what makes the demo reliable. Don't use `thinking_budget=0`: 3.x models reject it with a 400.
 - **Warm-up at Flask start:** `create_app()` in `backend/app.py` calls `services.llm.warm_up()`. **This is a one-line, Jose-approved edit to Rodrigo's file.** Rodrigo, keep it when you build NM-8/NM-12. In a background thread it creates the shared client and calls `models.get`, which opens the TLS connection without using generation quota. It runs once per process, so it's safe with Flask's reloader, and it does nothing without a key. It cut the first explanation from about 3.4 s to about 1 s.
 - **Free-tier rate limit:** 5 requests per minute per model. Hitting it falls back to templates (logged as a warning), so run `warm_cache.py` (NM-21) slowly, about one call every 15 s.
-- **What the model sees:** only `id, title, monthly_payment, delta_monthly, upfront_cost, total_cost, tradeoffs, action_label` (plus `rejection_reason` when set), the customer's first name and the raw `life_event`. Money is **pre-formatted strings** (`$294.34`, `$1,160`, `+$9.97`) from `templates.format_money`, so the model copies numbers instead of formatting them.
+- **What the model sees:** only `id, title, monthly_payment, change_vs_today, upfront_cost, total_cost, tradeoffs, action_label` (plus `rejection_reason` when set), the customer's first name and the raw `life_event`. Money is **pre-formatted strings** (`$294.34`, `$1,160`) from `templates.format_money`, so the model copies numbers instead of formatting them. The change versus today is a **phrase**, `change_vs_today` ("$9.97 more per month than today", "$20.40 less per month than today" or "the same as today"), not a signed number: the lite model kept writing "-$20.40 less" next to a signed value (found while warming the cache in NM-21).
 - **Fallback is per option:** a missing id, a non-string value, bad JSON, a missing key or any exception leaves that option on `template_explanation` with `source: "template"`.
 - **Explanations may name rejected options:** the engine's `rejection_reason` text is passed through. The model repeats it kindly, so wording like "15% of your income (limit 15%)" comes from NM-11 and may need Samu to reword it.
 - **NM-14 is wired in:** `explain_all` now runs `validate` on every LLM text (see NM-14's notes). The model has made small unsupported claims (for example, "set up payment reminders"), which is why the validator and the "use only facts in the JSON" prompt rule matter.
@@ -626,7 +627,7 @@ def template_explanation(option: dict) -> str     # "{title}: ${monthly_payment}
 ```
 Return `explanation_source: "llm" | "template"` on each recommendation (the UI can show a tiny badge in debug mode).
 
-**Already done in NM-13:** `template_explanation` and `format_money` live in `backend/services/templates.py` and are tested in `backend/tests/test_llm.py`. `explain_all` has a `# NM-14` comment where `validate(text, rec)` goes: reject the text and keep the template when it returns False. The LLM is given money as formatted strings (`$1,275`, `$294.34`, `+$9.97`), so `allowed_numbers` must accept those forms as well as the raw numbers.
+**Already done in NM-13:** `template_explanation` and `format_money` live in `backend/services/templates.py` and are tested in `backend/tests/test_llm.py`. `explain_all` has a `# NM-14` comment where `validate(text, rec)` goes: reject the text and keep the template when it returns False. The LLM is given money as formatted strings (`$1,275`, `$294.34`) and the change versus today as words, so `allowed_numbers` must accept those forms as well as the raw numbers.
 
 **Tasks:**
 - [x] Validator (the template is done in NM-13)
@@ -682,6 +683,7 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 
 **What changed / what to know (read this if you build on NM-15):**
 - **How to run:** `cd backend && flask run` (port 5000), then `cd frontend && npm run dev`. The Vite proxy forwards `/api` to `http://127.0.0.1:5000`. It's `127.0.0.1` rather than `localhost` because Node can resolve `localhost` to IPv6 while Flask only listens on IPv4.
+- **Demo mode (NM-21):** add `CACHE_ONLY=true` to `backend/.env` and restart Flask. Explanations then come from the committed cache (`backend/cache/`) with no network calls, so it works with Wi-Fi off. Re-warm with `python scripts/warm_cache.py` after any engine, data or prompt change.
 - **Different port (Samu, macOS):** Samu's earlier proxy pointed at 5001. It now defaults to 5000. Either turn off AirPlay Receiver, or run `flask run --port 5001` and put `VITE_API_PROXY=http://127.0.0.1:5001` in `frontend/.env.local` (gitignored; template in `frontend/.env.example`).
 - **No backend:** `VITE_USE_SAMPLE=true` in `frontend/.env.local` serves the bundled sample JSON. Only p1 has sample recommendations, and the sample dashboards have an **empty `equity_timeline`**.
 - **`api.js`:** `getPersonas()`, `getDashboard(id)` and `getRecommendations(id, lifeEvent)` (a POST with `{ life_event }`). Failures throw `ApiError` with `.status`: the HTTP code, or `0` when the server can't be reached. A 404 dashboard shows "Customer not found"; anything else shows a Retry box (`components/ErrorState.jsx`).
@@ -812,6 +814,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 **From NM-15:** every change to `lifeEvent` (via `onChange`) immediately re-requests recommendations. The cards switch to the loading skeleton until the response arrives, and `summary` is `null` meanwhile, so render no banner while it's `null`. Debounce the slider inside `WhatIfPanel` before calling `onChange`, since the Dashboard doesn't debounce for you.
 
 **From NM-20:** if the "Why this?" drawer is open during a What-if change, it keeps showing the same option (by `id`) with its new numbers, or closes if that option is no longer in the top cards. No work is needed in `WhatIfPanel`.
+**From NM-21:** the explanation cache has the income-drop slider at **10, 15, … 40%** (7 values) plus the new baby and longer commute chips. Keep `step={5}`, `min={10}` and `max={40}` on the slider, or users can reach values that aren't cached (live LLM normally; templates under `CACHE_ONLY=true`). If you add a chip or change the slider range, add it to `events()` in `backend/scripts/warm_cache.py` and re-warm.
 
 **Tasks:**
 - [ ] Chips + slider + reset
@@ -883,13 +886,22 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 **From NM-14:** cache the output of `explain_all`, never raw model text. It has already been through the number validator, so cached explanations are validated ones. A cached `"template"` entry may also mean the validator rejected the LLM text (see the `Validator rejected` log line), which is another reason to retry it rather than cache it. At the end of `warm_cache.py`, print `services.llm.hallucinations_caught`. That's the "we caught N hallucinations" number for the pitch (NM-32).
 
 **Tasks:**
-- [ ] Disk cache read/write
-- [ ] Warm script
-- [ ] Commit the warmed cache files
+- [x] Disk cache read/write
+- [x] Warm script
+- [x] Commit the warmed cache files
 
 **Acceptance criteria:**
 - [ ] With Wi-Fi off and `CACHE_ONLY=true`, every demo path shows LLM-written explanations
 - [ ] Cached responses return in < 200 ms
+
+**What changed / what to know (read this if you build on NM-21):**
+- **Warm it:** `cd backend && python scripts/warm_cache.py` (needs `LLM_API_KEY` in `backend/.env`). It covers 3 personas × (baseline, `new_baby`, `longer_commute`, `income_drop` at 10, 15, … 40%) = **30 combinations**, about 7 minutes (13 s between calls, for the free tier's 5 requests per minute). It's resumable (skips what's cached), `--force` redoes everything, `--only p2` does one customer. It never saves a result where any card fell back to a template, retrying twice after a 60 s wait. Last run: 30 of 30 combinations written (a cold-start timeout was retried automatically), 65 cached explanations, 0 hallucinations caught by the number validator, all 30 combinations served offline in under 30 ms.
+- **Demo mode:** put `CACHE_ONLY=true` in `backend/.env`. The API then never touches the network: a warmed combination returns its LLM-written text, and anything else returns the deterministic template. Without `CACHE_ONLY`, a warmed combination is still served from the cache (instant, no quota), and a miss calls Gemini live without saving it. Only the warm script writes `backend/cache/*.json`.
+- **Keys:** `"<customer>:<event>:<hash>"`, where the hash covers **everything the model is shown** (first name, event, each option's title, formatted numbers, trade-offs, action label, rejection reason) **plus `prompts/explain.txt`**. So any change to the engine, persona data, trade-off wording or the prompt turns the old entry into a miss. That's deliberate: a number change can never serve an explanation quoting the old number. **After any such change, re-run `warm_cache.py` and commit `backend/cache/`.** A cached entry also has to pass the number validator again before it's used.
+- **Slider:** the income-drop slider in `WhatIfPanel.jsx` already has `step={5}` over 10–40%, so every value a user can reach is cached.
+- **Tests:** `backend/tests/conftest.py` points every test at an empty temp cache, so the committed files never affect test results. `explain_all(..., use_cache=False)` exists only for the warm script.
+
+**Other tasks affected by NM-21 (each has a note in its own section):** NM-5, NM-18 and NM-28 (changes to options, persona data or trade-offs need a re-warm), NM-12 (the route is unchanged), NM-15 (demo-mode run line), NM-19 (the slider step is what makes the cache complete), NM-26 (Spanish needs its own warm run), NM-29 (re-warm at the freeze), NM-30 and NM-32 (demo setup and the hallucination count).
 
 ### NM-22 · Comparison table `E4` `P1` · 2 pts · **Rodrigo**
 *As a customer, I want to see every option the app considered, including the ones it rejected, and why.*
@@ -994,6 +1006,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 **Spec:**
 - EN/ES toggle in the header; UI strings in a simple dictionary
   - *(From NM-20)* "The header" is now the app bar in `App.jsx`; put the toggle next to the handoff button. New strings to translate: `WhyDrawer.jsx` (section titles, `ASSUMPTIONS` labels, source line, footer) and `HumanHandoff.jsx` (dialog, buttons, toast). Slot dates use `Intl.DateTimeFormat('en-US', …)`: pass `'es-US'` when Spanish is on.
+  - *(From NM-21)* the cache key hashes the model's input and the prompt, so adding `lang` to the payload (and loading a Spanish prompt) automatically separates Spanish from English entries. `scripts/warm_cache.py` has no language option yet: add a `--lang es` flag (or loop over languages) that passes `lang` through, then run it and commit the Spanish entries. "Warm the cache for `es` as well" above is that step.
 - `?lang=es` passed to the recommendations endpoint → the LLM explains in Spanish (numbers unchanged; the validator still applies, using Spanish number formats)
 - Warm the cache for `es` as well
 
@@ -1029,6 +1042,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 
 **Tasks:**
 - [ ] Edge cases: 0 months remaining, negative equity on trade-in (roll the negative equity into the new loan and say so in trade-offs), zero/negative surplus, income drop of 40%+, missing optional fields
+  - *(From NM-21)* any change here that alters an option's numbers, title, trade-offs or ranking changes cache keys. Don't re-warm until your last change, and tell Jose so he can re-run `scripts/warm_cache.py` before the freeze.
   - *(From NM-20)* if you add an assumption key for this (for example the rolled-in negative equity), add its label to the `ASSUMPTIONS` map in `frontend/src/components/WhyDrawer.jsx` so the drawer shows it properly.
 - [ ] Fuzz test: random life-event params for all personas; assert no exceptions and that all numbers are finite
 - [ ] Round money to 2 decimals at the API boundary only *(already done in `routes.py` by `round_money()`, NM-12; the engine should keep returning unrounded numbers)*
@@ -1047,12 +1061,12 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 
 **Tasks:**
 - [ ] Merge all open PRs or close them
-- [ ] Re-warm the cache (NM-21) from `main`
+- [ ] Re-warm the cache (NM-21) from `main`: `cd backend && python scripts/warm_cache.py`, then commit `backend/cache/*.json`. Check it's complete ("30 already cached" on a second run, 0 written) and re-run it after any later engine, data or prompt fix
 - [ ] Tag `v1.0`
 - [ ] Every teammate pulls `v1.0` and runs the demo path on their own laptop (backup machines)
 
 **Acceptance criteria:**
-- [ ] The demo runs from a clean clone with `CACHE_ONLY=true` on at least 2 laptops
+- [ ] The demo runs from a clean clone with `CACHE_ONLY=true` on at least 2 laptops (Wi-Fi off; every card on every path should be LLM-written, not a template: if a card reads "Title: $X/mo for N months. …", that combination missed the cache)
 
 ### NM-30 · Demo video `E6` `P0` · 3 pts · **Rodrigo**
 *As judges reviewing Devpost, we can see the product in under 2 minutes.*
@@ -1062,6 +1076,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 **Spec:** follow the plan's §12 script. Screen recording (QuickTime / OBS) at 1080p, with voice-over. Upload to YouTube as unlisted.
 
 **From NM-20:** for the responsible-AI moment, open "Why this?" on Maya's buyout (it shows APR 6.9%, a 60-month term, the residual and the purchase option fee, and "AI cannot change numbers"). For the human-handoff moment, use the header's "Talk to a TFS specialist" → pick a slot → the confirmation toast.
+**From NM-21:** record with `CACHE_ONLY=true` so the explanations are the committed ones and identical to what judges will see, and each click returns instantly.
 - 0:00 Hook → 0:15 Maya (lease end, buyout) → 0:45 Reyes (new baby → Highlander rejected) → 1:20 Daniel (equity → upgrade) → 1:40 responsible AI (validator, assumptions) → 1:50 business value
 
 **Acceptance criteria:**
@@ -1094,9 +1109,10 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - [ ] Each person rehearses the 2-minute pitch once out loud
 - [ ] Prepare answers: "Where does the data come from?", "What if the LLM is wrong?", "How would TFS deploy this?", "Why these affordability thresholds?"
   - *"Can I trust the numbers?"* (NM-20): open "Why this?" on any card. Every assumption the engine used is listed, and a human is one click away from every screen.
+  - *(NM-21)* **Hallucination count for the pitch:** `warm_cache.py` prints "Hallucinations caught by the number validator" at the end of every run. 30 of 30 combinations written (a cold-start timeout was retried automatically), 65 cached explanations, 0 hallucinations caught by the number validator, all 30 combinations served offline in under 30 ms. Re-run with `--force` before the freeze for the final figure. If it's 0, say honestly "the validator is a safety net; in our warm runs it didn't need to fire" and show `test_validator.py` rejecting "$199/mo at 2.9%".
   - *"What if the LLM is wrong?"* (NM-14): the LLM never computes. It gets pre-calculated, pre-formatted numbers, and a validator checks every digit it writes against the engine's output. One unknown number means that card shows a deterministic template instead. Live demo: `pytest backend/tests/test_validator.py -v` shows "only $199/mo at 2.9%" being rejected. Limit to admit if asked: numbers spelled out as words aren't checked
   - *"Where does the data come from?"* (NM-6/7): synthetic Toyota contracts and a vehicle catalog we wrote, plus bank data shaped exactly like Capital One's Nessie API, generated by a seeded script. One env var (`DATA_MODE`) switches to live Nessie
-- [ ] Laptop setup for judging: charger, `CACHE_ONLY=true`, browser zoom tested, tabs pre-opened
+- [ ] Laptop setup for judging: charger, `CACHE_ONLY=true` in `backend/.env` (restart Flask after changing it), browser zoom tested, tabs pre-opened
 
 **Acceptance criteria:**
 - [ ] Every teammate can give the pitch solo
