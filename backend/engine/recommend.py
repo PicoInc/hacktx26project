@@ -14,11 +14,13 @@ TOP_N = 3
 def _advisor_card(profile: dict) -> dict:
     """Human handoff, pinned to #1 when the customer is short every month or nothing is affordable."""
     pay_now = profile["contract"]["monthly_payment"]
+    months = profile["contract"].get("months_remaining", 0)
     card = _option(
         kind="talk_to_advisor", title="Talk to a TFS specialist first",
         vehicle_label="", keeps_vehicle=True, monthly_payment=pay_now, current_payment=pay_now,
-        upfront_cost=0, term_months=profile["contract"].get("months_remaining", 0),
-        total_cost=0, fuel_monthly=0,
+        upfront_cost=0, term_months=months,
+        # Nothing changes until the customer talks to someone, so the cost is today's plan
+        total_cost=pay_now * months, fuel_monthly=0,
         tradeoffs=["Your monthly budget is tight right now",
                    "A specialist can review relief options with you"],
         assumptions={}, action={"kind": "follow_up", "label": "Schedule a call"},
@@ -79,7 +81,17 @@ def recommend(profile: dict, life_event: dict | None = None) -> dict:
     for o in result["considered"]:
         o["previous_rank"] = before_ranks.get(o["id"])
     result.update(
-        life_event_applied=describe_life_event(profile, changed, life_event),
+        life_event_applied=_with_lost_options(describe_life_event(profile, changed, life_event), result),
         finances_after_event=changed["finances"],
     )
     return result
+
+
+def _with_lost_options(summary: str, result: dict) -> str:
+    """Add the options the event made unaffordable, so the banner says what changed, not just the surplus.
+
+    e.g. 'Baby on the way (+$500/mo) → monthly surplus now $400 · No longer affordable: Trade in for a ...'
+    """
+    lost = [o["title"] for o in result["considered"]
+            if o["previous_rank"] is not None and not o["affordable"]]
+    return f"{summary} · No longer affordable: {', '.join(lost)}" if lost else summary

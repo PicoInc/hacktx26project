@@ -8,7 +8,7 @@ from engine.tests.fixtures import P1
 from services import llm
 from services.templates import format_money, template_explanation
 
-ALLOWED_KEYS = {"id", "title", "monthly_payment", "delta_monthly", "upfront_cost", "total_cost",
+ALLOWED_KEYS = {"id", "title", "monthly_payment", "change_vs_today", "upfront_cost", "total_cost",
                 "tradeoffs", "action_label", "rejection_reason"}
 
 
@@ -107,7 +107,8 @@ def test_payload_only_has_allowed_fields_and_formatted_money(monkeypatch, recs):
         assert set(option) <= ALLOWED_KEYS
     buyout = next(o for o in sent["options"] if o["id"] == "lease_buyout")
     assert buyout["monthly_payment"] == "$294.34"
-    assert buyout["delta_monthly"].startswith("+$")
+    assert buyout["change_vs_today"] == "$9.97 more per month than today"   # words, never a signed number
+    assert not any(sign in str(sent) for sign in ("+$", "-$"))
     assert buyout["upfront_cost"] == "$0"
     assert "rejection_reason" not in buyout
     rejected = next(o for o in sent["options"] if o["id"].startswith("return_new_lease"))

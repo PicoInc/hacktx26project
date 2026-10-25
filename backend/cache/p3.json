@@ -1,0 +1,142 @@
+{
+  "p3:income_drop:1743987de1d1f93d": {
+    "extend_term": {
+      "source": "llm",
+      "text": "To help with your recent income drop, you can extend your loan by 12 months with a monthly payment of $319.34, which is $87.12 less per month than today. This lowers your payment by $87/mo. You can request extension."
+    },
+    "payment_deferral": {
+      "source": "llm",
+      "text": "Since you are experiencing a drop in income, you can skip your next 2 payments so your monthly payment is $0, which is $406.46 less per month than today. There is no payment for 2 months. You can request deferral."
+    },
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Daniel, since your income has dropped, you might want to talk to a TFS specialist first while keeping your monthly payment the same as today. Your monthly budget is tight right now. You can schedule a call."
+    }
+  },
+  "p3:income_drop:3827ed8c690e1a2e": {
+    "keep": {
+      "source": "llm",
+      "text": "Since your income has dropped, you can keep your Camry as is for $406.46, which is the same as today. A good trade-off is that it has no paperwork, no new commitments. You can set up payment reminders."
+    },
+    "refinance": {
+      "source": "llm",
+      "text": "Since your income has dropped, you might look at refinancing at 6.4%, which is $20.40 less per month than today for a monthly payment of $386.06. One trade-off to consider is that it saves about $734 over the rest of the loan. You can check the refinance offer."
+    },
+    "trade_in_upgrade:camry_hybrid_se_2027": {
+      "source": "llm",
+      "text": "Since your income has dropped, Daniel, trading in for a 2027 Camry Hybrid SE costs $58.63 more per month than today, with a monthly payment of $465.09. A helpful trade-off is that it uses your $8,385 equity as a down payment. You can see the upgrade offer now."
+    }
+  },
+  "p3:income_drop:8d2d1d1598f4c531": {
+    "extend_term": {
+      "source": "llm",
+      "text": "To help with your income drop of 35%, you can extend your loan by 12 months for $319.34, which is $87.12 less per month than today. While this lowers your payment by $87/mo, it costs about $696 more in total. You can request extension."
+    },
+    "payment_deferral": {
+      "source": "llm",
+      "text": "Since your income has dropped by 35%, you can skip your next 2 payments so your monthly payment is $406.46 less per month than today. You will have no payment for 2 months, but there is about $209 in extra interest and your payments move to the end. You can request deferral."
+    },
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Daniel, since your income has dropped by 35%, you might want to talk to a TFS specialist first while your monthly payment stays the same as today. A specialist can review relief options with you, and your monthly budget is tight right now. You can schedule a call."
+    }
+  },
+  "p3:income_drop:980cadcbe23d37cd": {
+    "keep": {
+      "source": "llm",
+      "text": "With a 25 percent drop in your income, keeping your Camry as is keeps your payments the same as today. It brings no paperwork, no new commitments. You can set up payment reminders."
+    },
+    "refinance": {
+      "source": "llm",
+      "text": "To help manage your income drop of 25 percent, refinancing puts you at $20.40 less per month than today. It saves about $734 over the rest of the loan. You can check the refinance offer."
+    },
+    "trade_in_upgrade:camry_hybrid_se_2027": {
+      "source": "llm",
+      "text": "Since your income has dropped by 25 percent, you might look at the 2027 Camry Hybrid SE, which costs $58.63 more per month than today. It uses your $8,385 equity as a down payment. You can see the upgrade offer."
+    }
+  },
+  "p3:income_drop:9fcc83371d611218": {
+    "keep": {
+      "source": "llm",
+      "text": "With a 15 percent income drop to navigate, Daniel, you can keep your Camry as is for $406.46, which is the same as today. A trade-off is that it has no paperwork, no new commitments. You can set up payment reminders."
+    },
+    "refinance": {
+      "source": "llm",
+      "text": "To help manage your income drop of 15 percent, you can refinance at 6.4% for $386.06, which is $20.40 less per month than today. A key trade-off is that it saves about $734 over the rest of the loan. You can check the refinance offer."
+    },
+    "trade_in_upgrade:camry_hybrid_se_2027": {
+      "source": "llm",
+      "text": "Since your income took a 15 percent drop, you might consider trading in for a 2027 Camry Hybrid SE, which costs $465.09 and is $58.63 more per month than today. This option uses your $8,385 equity as a down payment. You can see the upgrade offer."
+    }
+  },
+  "p3:income_drop:d3dd463fd3b4e226": {
+    "keep": {
+      "source": "llm",
+      "text": "Keeping your Camry as is costs the same as today, which can help during an income drop. A trade-off is that there is no paperwork, no new commitments. You can set up payment reminders."
+    },
+    "refinance": {
+      "source": "llm",
+      "text": "Refinancing at 6.4% gives you a payment of $386.06, which is $20.40 less per month than today. A trade-off is that it is the same car, same payoff date. You can check the refinance offer."
+    },
+    "trade_in_upgrade:camry_hybrid_se_2027": {
+      "source": "llm",
+      "text": "Daniel, since you experienced an income drop, trading in for a 2027 Camry Hybrid SE costs $58.63 more per month than today, with a new 60-month loan. You can see the upgrade offer."
+    }
+  },
+  "p3:income_drop:f10e8d73393636bd": {
+    "keep": {
+      "source": "llm",
+      "text": "To help manage your income drop, you can keep your Camry as is for $406.46, which is the same as today. A trade-off is that there is no paperwork, no new commitments. You can set up payment reminders."
+    },
+    "refinance": {
+      "source": "llm",
+      "text": "With your recent income drop, refinancing at 6.4% gives you a monthly payment of $386.06, which is $20.40 less per month than today. One trade-off is that it is the same car, same payoff date. You can check the refinance offer."
+    },
+    "trade_in_upgrade:camry_hybrid_se_2027": {
+      "source": "llm",
+      "text": "Since your income changed, trading in for a 2027 Camry Hybrid SE will cost $58.63 more per month than today. You will get a new 60-month loan, which uses your $8,385 equity as a down payment. You can see the upgrade offer now."
+    }
+  },
+  "p3:longer_commute:44da788790c30cad": {
+    "keep": {
+      "source": "llm",
+      "text": "If you want to keep your Camry as is for your longer commute, your payment will stay the same as today. You will have no paperwork, no new commitments. You can set up payment reminders."
+    },
+    "refinance": {
+      "source": "llm",
+      "text": "To help with your longer commute, you can refinance at 6.4% for $20.40 less per month than today. It keeps the same car, same payoff date. You can check the refinance offer."
+    },
+    "trade_in_upgrade:camry_hybrid_se_2027": {
+      "source": "llm",
+      "text": "Since your commute is getting longer, Daniel, you could trade in for a 2027 Camry Hybrid SE with $58.63 more per month than today. This choice uses your $8,385 equity as a down payment. You can see the upgrade offer."
+    }
+  },
+  "p3:new_baby:9464b9e892b2a86a": {
+    "refinance": {
+      "source": "llm",
+      "text": "Since you are welcoming a new baby, Daniel, this choice saves about $734 over the rest of the loan at $20.40 less per month than today. You can check the refinance offer."
+    },
+    "trade_in_upgrade:camry_hybrid_se_2027": {
+      "source": "llm",
+      "text": "Since you have a new baby, Daniel, you might like this choice at $58.63 more per month than today. A trade-in uses your $8,385 equity as a down payment. You can see the upgrade offer."
+    },
+    "trade_in_upgrade:highlander_xle_2027": {
+      "source": "llm",
+      "text": "With your new baby on the way, this upgrade runs $309.35 more per month than today. This option uses your $8,385 equity as a down payment. You can see the upgrade offer."
+    }
+  },
+  "p3:none:f47b2a36a9c2b020": {
+    "keep": {
+      "source": "llm",
+      "text": "You can keep your Camry as is for $406.46, making it the same as today. A trade-off is that it requires no paperwork, no new commitments. You can set up payment reminders."
+    },
+    "refinance": {
+      "source": "llm",
+      "text": "You can refinance your current loan to pay $386.06, which is $20.40 less per month than today. This comes with the trade-off that it is the same car, same payoff date. You can check the refinance offer."
+    },
+    "trade_in_upgrade:camry_hybrid_se_2027": {
+      "source": "llm",
+      "text": "Daniel, you can trade in for a 2027 Camry Hybrid SE with a payment of $465.09, which is $58.63 more per month than today. This option uses your $8,385 equity as a down payment. You can see the upgrade offer."
+    }
+  }
+}

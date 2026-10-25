@@ -1,0 +1,66 @@
+{
+  "p1:income_drop:150df1a493b74563": {
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Maya, since your income dropped recently, you might want to talk to a TFS specialist first to help ease your mind. Your monthly budget is tight right now, but this keeps your payment the same as today. You can schedule a call."
+    }
+  },
+  "p1:income_drop:2113b6f3259f864f": {
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Maya, since your income dropped recently, you might want to talk to a TFS specialist first. Your monthly payment will stay the same as today, but remember that your monthly budget is tight right now. You can schedule a call."
+    }
+  },
+  "p1:income_drop:83ef29eadd031c70": {
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Maya, since your income dropped recently, you might want to talk to a TFS specialist first where your payment will be the same as today. Your monthly budget is tight right now, so you can schedule a call."
+    }
+  },
+  "p1:income_drop:bb749d612571a4e1": {
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Maya, since your income has dropped by 25 percent, you can talk to a TFS specialist first to help ease your mind. Your monthly payment will stay the same as today, but your monthly budget is tight right now. You can schedule a call."
+    }
+  },
+  "p1:income_drop:cda5969ff0a987aa": {
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Maya, since your income has dropped, you can talk to a TFS specialist first to help ease your tight budget. Your payment will stay the same as today, but a specialist can review relief options with you. You can schedule a call."
+    }
+  },
+  "p1:income_drop:da1d63651106b770": {
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Maya, since your income has dropped by 15%, your monthly budget is tight right now. You can talk to a TFS specialist first to keep your payment the same as today. You can schedule a call."
+    }
+  },
+  "p1:income_drop:f4498adebdc6b527": {
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Maya, since your income has dropped by 20%, you might want to talk to a TFS specialist first. Your monthly payment will be the same as today, but your monthly budget is tight right now. You can schedule a call."
+    }
+  },
+  "p1:longer_commute:f0401e2b049b2f84": {
+    "lease_buyout": {
+      "source": "llm",
+      "text": "Maya, since your commute is getting longer, buying out your Corolla might make sense at $294.34, which is $9.97 more per month than today. You own the car; repairs after warranty are on you. You can start the buyout online."
+    }
+  },
+  "p1:new_baby:586f25fe636a4e17": {
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Maya, since you have a new baby, you might want to talk to a TFS specialist first. Your monthly payment will be the same as today, but your monthly budget is tight right now. You can schedule a call to explore this further."
+    }
+  },
+  "p1:none:2685bb001c435eb0": {
+    "buy_miles_new_lease:corolla_le_2027": {
+      "source": "llm",
+      "text": "You can lease a 2027 Corolla LE for $310.40, coming out to $26.03 more per month than today. There is a $1,160 due upfront cost to consider for this choice. You can see the lease offer now."
+    },
+    "lease_buyout": {
+      "source": "llm",
+      "text": "Maya, you can buy out your Corolla for $294.34, which is $9.97 more per month than today. This option avoids the $1,275 over-mileage fee, but remember that you own the car and repairs after warranty are on you. You can start the buyout online."
+    }
+  }
+}

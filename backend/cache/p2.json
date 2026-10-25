@@ -1,0 +1,118 @@
+{
+  "p2:income_drop:1ed49cccb91ea094": {
+    "keep": {
+      "source": "llm",
+      "text": "Since you are managing a 10 percent income drop, the Reyes family can keep your RAV4 with a monthly payment of $564.76, which is the same as today. A trade-off is that it is paid off in 38 months. You can set up payment reminders."
+    }
+  },
+  "p2:income_drop:4ab9a0a562ad7ac7": {
+    "extend_term": {
+      "source": "llm",
+      "text": "To help with your income drop, you can choose a loan extension that costs $439.52, which is $125.24 less per month than today. While this lowers your payment by $125/mo, it costs about $515 more in total. You can request extension."
+    },
+    "payment_deferral": {
+      "source": "llm",
+      "text": "With your recent income drop, you can skip your next 2 payments for $0, which is $564.76 less per month than today. You will have no payment for 2 months, but you should keep in mind that there is about $162 in extra interest and your payments move to the end. You can request deferral."
+    },
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Since your income dropped, the Reyes family, your monthly payment will stay the same as today at $564.76. A specialist can review relief options with you, though your monthly budget is tight right now. You can schedule a call."
+    }
+  },
+  "p2:income_drop:7ca13e02e5e24e24": {
+    "extend_term": {
+      "source": "llm",
+      "text": "With a 20 percent income drop to manage, you can extend your loan by 12 months for $439.52 per month, which is $125.24 less per month than today. This lowers your payment by $125/mo, even though it costs about $515 more in total. You can request extension."
+    },
+    "payment_deferral": {
+      "source": "llm",
+      "text": "To help with your 20 percent income drop, you can skip your next 2 payments and pay $0 for now. You will have no payment for 2 months, with about $162 in extra interest; payments move to the end. You can request deferral."
+    },
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Since your income has dropped by 20 percent, you can connect with us to talk things through. A specialist can review relief options with you because your monthly budget is tight right now. You can schedule a call."
+    }
+  },
+  "p2:income_drop:822640f7e942ea09": {
+    "extend_term": {
+      "source": "llm",
+      "text": "To help manage your income drop, you can extend your loan by 12 months for $439.52 per month, which is $125.24 less per month than today. This lowers your payment by $125/mo, but costs about $515 more in total. You can request extension."
+    },
+    "payment_deferral": {
+      "source": "llm",
+      "text": "During your income drop, you can skip your next 2 payments so your monthly payment is $0, which is $564.76 less per month than today. You will have no payment for 2 months, but about $162 in extra interest; payments move to the end. You can request deferral."
+    },
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Since you are experiencing an income drop, the Reyes family, you can talk to a TFS specialist first while keeping your monthly payment at the same as today. A specialist can review relief options with you, though your monthly budget is tight right now. You can schedule a call."
+    }
+  },
+  "p2:income_drop:a1e4f195f144c4f5": {
+    "extend_term": {
+      "source": "llm",
+      "text": "With your income drop, you can extend your loan by 12 months for a monthly payment of $439.52. This option lowers your payment by $125/mo, though it costs about $515 more in total. You can request extension."
+    },
+    "payment_deferral": {
+      "source": "llm",
+      "text": "To help with your income drop, you can skip your next 2 payments with no payment for 2 months. This gives you about $162 in extra interest with payments moving to the end. You can request deferral."
+    },
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Since the Reyes family is facing a tight income drop right now, you can talk to a TFS specialist first. A specialist can review relief options with you, keeping your monthly payment the same as today. You can schedule a call."
+    }
+  },
+  "p2:income_drop:aad37f23d31c55fc": {
+    "extend_term": {
+      "source": "llm",
+      "text": "Since your income dropped, you can extend your loan by 12 months for $439.52, which is $125.24 less per month than today. Costs about $515 more in total. You can request extension."
+    },
+    "payment_deferral": {
+      "source": "llm",
+      "text": "With your income drop, you can skip your next 2 payments and pay $0, which is $564.76 less per month than today. No payment for 2 months. You can request deferral."
+    },
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Because your income dropped, the Reyes family can talk to a TFS specialist first to keep payments the same as today at $564.76. A specialist can review relief options with you. You can schedule a call."
+    }
+  },
+  "p2:income_drop:fc6208279d9f3a6c": {
+    "extend_term": {
+      "source": "llm",
+      "text": "To help with your income drop, you can extend your loan by 12 months, which costs about $515 more in total. You can request extension."
+    },
+    "payment_deferral": {
+      "source": "llm",
+      "text": "With your income drop, you can skip your next 2 payments, with about $162 in extra interest; payments move to the end. You can request deferral."
+    },
+    "talk_to_advisor": {
+      "source": "llm",
+      "text": "Given your recent income drop, you can connect with a specialist since your monthly budget is tight right now. You can schedule a call."
+    }
+  },
+  "p2:longer_commute:9f04d65b1c659168": {
+    "keep": {
+      "source": "llm",
+      "text": "Since the Reyes family has a longer commute now, keeping your RAV4 as is keeps your monthly payment the same as today. You will be paid off in 38 months, so you can set up payment reminders."
+    },
+    "trade_in_upgrade:highlander_xle_2027": {
+      "source": "llm",
+      "text": "Since you have a longer commute now, trading in for a 2027 Highlander XLE is $232.57 more per month than today. It uses your $4,159 equity as a down payment, and you can see the upgrade offer."
+    }
+  },
+  "p2:new_baby:3ab5c4b886d95920": {
+    "keep": {
+      "source": "llm",
+      "text": "Since you are welcoming a new baby, keeping your RAV4 as is keeps things simple with a monthly payment of $564.76, which is the same as today. You will have no paperwork, no new commitments. You can set up payment reminders."
+    }
+  },
+  "p2:none:2d7b2de79f97c990": {
+    "keep": {
+      "source": "llm",
+      "text": "You can keep your RAV4 as is with your monthly payment staying the same as today at $564.76. This option means it will be paid off in 38 months. You can set up payment reminders."
+    },
+    "trade_in_upgrade:highlander_xle_2027": {
+      "source": "llm",
+      "text": "You can trade in for a 2027 Highlander XLE for $797.33 per month, which is $232.57 more per month than today. Keep in mind that this involves a new 60-month loan. You can see the upgrade offer."
+    }
+  }
+}
