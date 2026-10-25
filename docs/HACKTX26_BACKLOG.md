@@ -4,7 +4,7 @@
 > **Team:** Samu (Engine + decision UX) · Rodrigo (Data + backend + data viz) · Jose (AI + frontend core)
 > **Full plan & API contract:** `HACKTX26_PLAN.md` · **Shared numbers:** see the Appendix at the bottom of this file
 >
-> **Status (Sat 3:25 PM):** Sprint 0 ✅ done · **Sprint 1 in progress** (ends 7:00 PM stand-up) · Roles rebalanced: ~21 pts each
+> **Status (Sat 9:45 PM):** Sprints 0–1 ✅ · **Sprint 2 in progress** · Done: NM-4 to NM-14, NM-16, NM-17, NM-18 · NM-23 backend done (chart waits on NM-15)
 
 ---
 
@@ -15,7 +15,7 @@
 | Sprint | Timebox | Sprint goal | Ends with |
 |---|---|---|---|
 | ✅ **Sprint 0** | Sat 3:00 → 3:45 PM | Everyone can code without blocking anyone | **Done** — skeleton pushed, contract agreed |
-| **Sprint 1** | Sat 3:45 → 7:00 PM | Each layer works on its own | Stand-up 7 PM |
+| ✅ **Sprint 1** | Sat 3:45 → 7:00 PM | Each layer works on its own | Stand-up 7 PM |
 | **Sprint 2** | Sat 7:00 → 10:30 PM | One persona works end to end | Stand-up 10:30 PM + **soft submission 11:30 PM** |
 | **Sprint 3** | Sat 10:30 PM → Sun 3:00 AM | Full MVP (3 personas + What-if) | Stand-up 3 AM |
 | **Sprint 4** | Sun 3:00 → 8:30 AM | Polish + stretch goals | Stand-up 8:30 AM |
@@ -57,7 +57,7 @@
 | Person | Role | Owns (only they edit) |
 |---|---|---|
 | **Samu** | Engine + decision UX | `backend/engine/**` (math, options, guardrails, ranking, life events, tests) · `frontend/src/components/WhatIfPanel.jsx` |
-| **Rodrigo** | Data + backend + data viz | `backend/app.py`, `backend/routes.py`, `backend/requirements.txt`, `backend/data/**`, `backend/services/profile.py`, `nessie.py`, `equity.py`, `recalls.py`, `backend/scripts/seed_nessie.py` · `frontend/src/components/ComparisonTable.jsx`, `EquityChart.jsx` |
+| **Rodrigo** | Data + backend + data viz | `backend/app.py`, `backend/routes.py`, `backend/requirements.txt`, `backend/data/**`, `backend/services/profile.py`, `customer_profile.py`, `nessie.py`, `equity.py`, `recalls.py`, `backend/scripts/seed_nessie.py`, `check_data.py`, `generate_mock_bank.py`, `backend/tests/test_profile.py` · `frontend/src/components/ComparisonTable.jsx`, `EquityChart.jsx` |
 | **Jose** | AI + frontend core | `backend/services/llm.py`, `templates.py`, `cache.py`, `backend/prompts/**`, `backend/scripts/warm_cache.py`, `backend/cache/**` · `frontend/package.json`, `App.jsx`, `api.js`, `pages/**`, `styles/**`, and every other component |
 
 **Why this split:** Samu owns the decision logic *and* the UI that exposes it (What-if), Rodrigo owns everything data from raw JSON to API to charts, and Jose owns the AI layer and the app shell everything plugs into.
@@ -65,6 +65,7 @@
 **Cross-owner seams (agree on these, then never touch each other's files):**
 - **Engine → API:** Rodrigo's route calls only `engine.recommend.recommend(profile, life_event) -> dict` (Samu).
 - **API → LLM:** Rodrigo's route calls only `services.llm.explain_all(recommendations, profile, life_event) -> dict[option_id, {"text", "source"}]` (Jose).
+- **Data → Engine:** `services.customer_profile.build_profile(customer_id)` (Rodrigo) builds the profile the engine takes. Engine tests can use it instead of hand-typed fixtures.
 - **Dashboard → components:** `Dashboard.jsx` (Jose) holds the `lifeEvent` state and renders other people's components with these props:
   - `<WhatIfPanel value={lifeEvent} onChange={setLifeEvent} summary={recs.life_event_applied} />` (Samu)
   - `<ComparisonTable considered={recs.considered} />` (Rodrigo)
@@ -121,7 +122,7 @@ Rule of thumb: **Samu and Rodrigo meet at NM-12** (Rodrigo's endpoint calls Samu
 
 ## Sprint 1 — Layers work alone (Sat 3:45 → 7:00 PM)
 
-### ✅ NM-4 · Core finance math `E1` `P0` · 3 pts · **Samu**
+### NM-4 · Core finance math `E1` `P0` · 3 pts · **Samu**
 *As the engine, I need correct payment math so every recommendation is trustworthy.*
 
 **Context:** Every number a customer sees comes from these functions. The judges' responsible-AI question will be "how do you know the numbers are right?", and the answer is these tested pure functions. They're the foundation for NM-5, NM-11 and NM-17.
@@ -151,14 +152,14 @@ def monthly_fuel_cost(miles_per_year: int, mpg: float, fuel_price: float) -> flo
 `constants.py` holds **every** assumption from the Appendix (rates, fees, thresholds). No magic numbers anywhere else in the engine.
 
 **Tasks:**
-- [x] Create `constants.py` with the full Appendix A table
-- [x] Implement the 8 functions above with docstrings
-- [x] Unit tests using the reference values below
-- [x] Edge cases: APR 0, term 1, payments_made == term (balance ≈ 0), negative equity
+- [ ] Create `constants.py` with the full Appendix A table
+- [ ] Implement the 8 functions above with docstrings
+- [ ] Unit tests using the reference values below
+- [ ] Edge cases: APR 0, term 1, payments_made == term (balance ≈ 0), negative equity
 
 **Acceptance criteria:**
-- [x] `pytest backend/engine/tests/test_finance.py` passes
-- [x] Reference values match to the cent (±$0.01):
+- [ ] `pytest backend/engine/tests/test_finance.py` passes
+- [ ] Reference values match to the cent (±$0.01):
   - `loan_payment(30000, 4.9, 60)` → **564.76**
   - `loan_balance(30000, 4.9, 60, 22)` → **≈ 19,841**
   - `loan_payment(22000, 9.9, 72)` → **406.46**
@@ -167,10 +168,7 @@ def monthly_fuel_cost(miles_per_year: int, mpg: float, fuel_price: float) -> flo
 
 **How to verify:** run pytest, and paste one case into an online loan calculator (e.g. bankrate.com) as a sanity check.
 
-**Done (Samu, merged into `dev`):** `constants.py`, `finance.py` and `test_finance.py`. Every reference value above is asserted and passes on `dev` (564.76, ≈19,841, 406.46, ≈12,615, 284.37, 35,100, 1,275.00, 294.34, 93.75), plus the edge cases (APR 0, final payment, bad input).
-- Since `5b72de3` (Rodrigo), `VEHICLE_CATALOG` is loaded from `backend/data/vehicle_catalog.json`, so car specs have one source of truth. The rate, fee and guardrail constants still live in `constants.py`.
-
-### ✅ NM-5 · Option builder `E1` `P0` · 5 pts · **Samu**
+### NM-5 · Option builder `E1` `P0` · 5 pts · **Samu**
 *As a customer, I want every realistic option compared so I can see my choices side by side.*
 
 **Context:** This is what turns "a car + a contract + finances" into the list of possible moves. NM-11 then filters and ranks this list. Each option must carry everything the UI card and the LLM need, so nobody downstream does math.
@@ -224,35 +222,31 @@ Every option returns this exact shape (it becomes a card):
 Action kinds: `self_service` (buyout, refinance, extra miles, extension), `follow_up` (talk to an advisor, deferral, recall), `offer` (trade-in / new lease using `offers.json`).
 
 **Tasks:**
-- [x] Lease option generators (4)
-- [x] Loan option generators (5), relief options behind a flag
-- [x] Trade-offs: 1–3 short strings per option, written from the numbers (no LLM)
-- [x] Assumptions dict on every option
-- [x] `action.confirmation` on every option: one customer-facing sentence about what happens next, no numbers (added by NM-10; see the p1 sample for wording)
-- [x] Tests per persona (use the fixtures in Appendix B)
+- [ ] Lease option generators (4)
+- [ ] Loan option generators (5), relief options behind a flag
+- [ ] Trade-offs: 1–3 short strings per option, written from the numbers (no LLM)
+- [ ] Assumptions dict on every option
+- [ ] `action.confirmation` on every option: one customer-facing sentence about what happens next, no numbers (added by NM-10; see the p1 sample for wording)
+- [ ] Tests per persona (use the fixtures in Appendix B)
 
 **Acceptance criteria:**
-- [x] p1 produces `lease_buyout` at **$294.34/mo** and `buy_miles_new_lease` with upfront **$1,160** *(the new-lease payment is now $310.40 after the 2027 Corolla MSRP change in `7682bff`)*
-- [x] p2 produces `keep` at **$564.76** and `trade_in_upgrade` (Highlander) at **≈ $797.33**, and **no** `refinance` (4.9% < 6.4%)
-- [x] p3 produces `refinance` at **≈ $386.06**, `trade_in_upgrade` (Camry Hybrid) at **≈ $465.09**, equity used **≈ $8,385**
-- [x] Every option has all fields in the shape above (a test asserts the keys)
+- [ ] p1 produces `lease_buyout` at **$294.34/mo** and `buy_miles_new_lease` with upfront **$1,160**
+- [ ] p2 produces `keep` at **$564.76** and `trade_in_upgrade` (Highlander) at **≈ $797.33**, and **no** `refinance` (4.9% < 6.4%)
+- [ ] p3 produces `refinance` at **≈ $386.06**, `trade_in_upgrade` (Camry Hybrid) at **≈ $465.09**, equity used **≈ $8,385**
+- [ ] Every option has all fields in the shape above (a test asserts the keys)
+
+> **Changed in NM-18:** the 2027 Corolla MSRP is now 22,500, so p1's new lease (`buy_miles_new_lease` / `return_new_lease`) is **$310.40/mo** (was $324.20). `test_options.py` was updated to match.
 
 **How to verify:** `pytest backend/engine/tests/test_options.py -v` and print the options for each persona.
 
-**Done (Samu, merged into `dev`):** `options.py` builds all 9 option kinds through a single `_option()` factory, and `engine/tests/fixtures.py` holds the 3 personas in the dashboard shape. Covered by `test_options.py`.
-- **ids:** options carry `kind` (the type: use it for logic and tests) and `target` (catalog id or `null`). `id` is `kind` or `kind:target` (e.g. `trade_in_upgrade:highlander_xle_2027`), so ids are unique.
-- **p1's new-lease payment is now $310.40, not $324.20.** `7682bff` (Rodrigo) lowered the 2027 Corolla MSRP to $22,500. Upfront costs are unchanged ($1,160 prepaid miles, $1,670 return).
-- **Relief options** (`extend_term`, `payment_deferral`) are only generated with `include_relief=True`. `payment_deferral` gets a first-year average `effective_monthly`, so a $0 payment never looks "free" in the ranking.
-- **Longer commute (NM-17):** lease projections add `extra_miles_per_year × months_remaining / 12`.
-
-### NM-6 · Synthetic Toyota data `E2` `P0` · 3 pts · **Rodrigo**
+### ✅ NM-6 · Synthetic Toyota data `E2` `P0` · 3 pts · **Rodrigo**
 *As a demo, we need 3 believable customers whose data produces the story we want to tell.*
 
 **Context:** TFS has no public API, so the challenge explicitly asks for synthetic data. These files are the Toyota side of every persona. The numbers below were checked so each persona lands on its intended top move. Copy them exactly, and change them only together with Samu (NM-18).
 
 **Blocked by:** nothing. Start immediately.
 
-**Files:** `backend/data/toyota_profiles.json`, `backend/data/vehicle_catalog.json`, `backend/data/offers.json`
+**Files:** `backend/data/toyota_profiles.json`, `backend/data/vehicle_catalog.json`, `backend/data/offers.json`, `backend/scripts/check_data.py`
 
 **Spec:**
 - `toyota_profiles.json`: an array with one object per persona: `customer_id`, `name`, `tagline`, `goals`, `vehicle`, `contract`, `miles_per_year`, `vehicle_targets` (model keys from the catalog). All values are in **Appendix B**.
@@ -260,25 +254,33 @@ Action kinds: `self_service` (buyout, refinance, extra miles, extension), `follo
 - `offers.json`: 2–3 synthetic offers (e.g. "Loyalty: 0.5% APR reduction on a new Toyota", "Prepaid miles at $0.15/mi before lease end"), each `{ id, title, applies_to, terms, disclaimer: "Synthetic offer for demo purposes" }`.
 
 **Tasks:**
-- [ ] Write the 3 JSON files from Appendix A and B
-- [ ] Add `"source": "synthetic"` at the top level of each file
-- [ ] Load-test: a tiny script that loads each file and prints persona names
+- [x] Write the 3 JSON files from Appendix A and B
+- [x] Add `"source": "synthetic"` at the top level of each file
+- [x] Load-test: `backend/scripts/check_data.py`
 
 **Acceptance criteria:**
-- [ ] Every field used by the contract's `vehicle` and `contract` objects exists for p1, p2 and p3
-- [ ] The values match Appendix B exactly
-- [ ] The files parse with `json.load` without errors
+- [x] Every field used by the contract's `vehicle` and `contract` objects exists for p1, p2 and p3
+- [x] The values match Appendix B exactly (except the 2027 Corolla MSRP, changed in NM-18)
+- [x] The files parse with `json.load` without errors
 
-**How to verify:** `python -c "import json; print([p['name'] for p in json.load(open('backend/data/toyota_profiles.json'))['profiles']])"`
+**How to verify:** `python3 backend/scripts/check_data.py`
 
-### NM-7 · Mock bank data + adapter `E2` `P0` · 3 pts · **Rodrigo**
+**What changed / what to know (read this if you build on NM-6):**
+- **Structure:** each file is `{ "source": "synthetic", "<main key>": ... }` → `profiles` (list), `vehicles` (keyed by model id), `offers` (list).
+- **The catalog has more fields than the spec:** `label, year, model, trim, msrp, mpg, lease_residual_pct`. Cars customers already own have `msrp` and `lease_residual_pct` set to `null`. `lease_residual_pct` is a decimal (0.62, not 62).
+- **The catalog is the single source of truth:** since NM-18, `engine/constants.py` loads `VEHICLE_CATALOG` from this JSON. Change car data **only here**.
+- **Profiles store raw inputs only** (`cap_cost`, `money_factor`, `principal`, `payments_made`, …). Computed values (payoff, lease APR, projected miles, equity) are calculated in NM-8, never stored. Key names match the contract: `est_value`, `miles_allowed_total`. The car is referenced by `vehicle.model_id`.
+- **Offers:** `applies_to` uses the engine's option kinds (`buy_miles_new_lease`, `trade_in_upgrade`, `lease_buyout`), and every rate in `terms` matches Appendix A. If a constant changes, update the offer text too.
+- **`check_data.py`** checks the required profile keys and that every `model_id` and `vehicle_targets` entry exists in the catalog. Run it after any data change.
+
+### ✅ NM-7 · Mock bank data + adapter `E2` `P0` · 3 pts · **Rodrigo**
 *As the engine, I need one normalized financial profile no matter where the data comes from.*
 
 **Context:** Nessie was unreachable at 3 PM. This story makes the app work without it: mock files shaped exactly like Nessie's responses, plus one adapter function. NM-25 later swaps in live Nessie by flipping an env var, and nothing else changes.
 
 **Blocked by:** nothing (needs the persona numbers from Appendix B).
 
-**Files:** `backend/data/mock_bank/p1.json`, `p2.json`, `p3.json`, `backend/services/profile.py`
+**Files:** `backend/data/mock_bank/p1.json`, `p2.json`, `p3.json`, `backend/scripts/generate_mock_bank.py`, `backend/services/profile.py`, `backend/tests/test_profile.py`
 
 **Spec:**
 Mock file shape (mirrors Nessie):
@@ -308,25 +310,32 @@ Normalization rules:
 - `savings` / `checking` = balances by account type
 
 **Tasks:**
-- [ ] Generate the 3 mock files (a small script with a fixed random seed is fine) so the normalized totals match Appendix B within ±$5
-- [ ] Implement `get_financial_profile`
-- [ ] Unit test: normalized output for each persona matches Appendix B
+- [x] Generate the 3 mock files with a seeded script so the normalized totals match Appendix B within ±$5
+- [x] Implement `get_financial_profile`
+- [x] Unit tests: `backend/tests/test_profile.py` (5 tests)
 
 **Acceptance criteria:**
-- [ ] p1 → income ≈ 2,100, bills ≈ 1,150, spending ≈ 520, surplus ≈ 430, savings 2,600
-- [ ] p2 and p3 match Appendix B the same way
-- [ ] `DATA_MODE` unset defaults to `mock`; `DATA_MODE=nessie` raises a clear "not implemented yet" error (until NM-25)
+- [x] p1 → income 2,100 · bills 1,149.37 · spending 520 · surplus 430.63 · savings 2,600
+- [x] p2 and p3 match Appendix B the same way
+- [x] `DATA_MODE` unset defaults to `mock`; `DATA_MODE=nessie` raises `NotImplementedError`; an unknown mode raises `ValueError`
 
-**How to verify:** `python -c "from services.profile import get_financial_profile as g; print(g('p1'))"`
+**How to verify:** from `backend/`: `python -c "from services.profile import get_financial_profile as g; print(g('p1'))"` and `python -m pytest tests/test_profile.py -v`
 
-### NM-8 · Flask endpoints (read) `E2` `P0` · 2 pts · **Rodrigo**
+**What changed / what to know (read this if you build on NM-7):**
+- **Don't edit the mock files by hand.** Change the `PERSONAS` settings in `scripts/generate_mock_bank.py` and rerun it. `random.Random(customer_id)` makes the output identical every run.
+- **Data window:** Jul 24 → Oct 23, 2026 (91 days). 6 biweekly paychecks; purchases are random amounts scaled to the exact 3-month spending total.
+- **Bills include the car payment** as payee "Toyota Financial Services". Totals: p1 1,149.37 · p2 3,599.76 · p3 2,801.46.
+- **The adapter is split for NM-25:** `load_mock_bank_data()` reads the file and `calculate_monthly_finances()` does the math. Live Nessie only needs a new loader; the math is reused.
+- **Test layout:** non-engine tests live in `backend/tests/`; engine tests stay in `backend/engine/tests/`.
+
+### ✅ NM-8 · Flask endpoints (read) `E2` `P0` · 2 pts · **Rodrigo**
 *As the frontend, I need the persona list and a full dashboard payload from the API.*
 
-**Context:** These two endpoints let Rodrigo switch off the sample JSON early (NM-15). The dashboard payload is also the exact input the engine takes, so it's the "profile" object everyone shares.
+**Context:** These two endpoints let the frontend switch off the sample JSON early (NM-15). The dashboard payload is also the exact input the engine takes, so it's the "profile" object everyone shares.
 
 **Blocked by:** NM-6, NM-7
 
-**Files:** `backend/app.py`, `backend/routes.py`
+**Files:** `backend/app.py`, `backend/routes.py`, `backend/services/customer_profile.py`
 
 **Spec:**
 - `GET /api/personas` → `[{ customer_id, name, tagline }]`
@@ -337,18 +346,26 @@ Normalization rules:
 - CORS enabled for `http://localhost:5173`
 
 **Tasks:**
-- [ ] Flask app factory, CORS (`flask-cors`), JSON error handler
-- [ ] Both routes, composed from `toyota_profiles.json` + `get_financial_profile()`
-- [ ] Ask Samu for `loan_balance` (or temporarily stub it, then swap in NM-4)
-- [ ] **Keep these lines in `create_app()`** (added by Jose in NM-13): `from services.llm import warm_up` then `warm_up()`. They open the LLM connection in the background at startup so the first recommendations request is fast. They do nothing without `LLM_API_KEY`, and they need no other change
-- [ ] `backend/.env` needs `LLM_API_KEY` and `LLM_MODEL=gemini-3.5-flash-lite` for real explanations (see `.env.example`); without them the API still works and returns template text
+- [x] Flask app factory, CORS (`flask-cors`), JSON error handlers
+- [x] Both routes, composed from `toyota_profiles.json` + `vehicle_catalog.json` + `get_financial_profile()`
+- [x] Uses Samu's real `loan_balance` and `projected_end_miles` (no stub needed)
+- [ ] **Keep these lines in `create_app()`** (added by Jose in NM-13): `from services.llm import warm_up` then `warm_up()`. Confirm they survived the NM-8 `app.py` rewrite. They open the LLM connection in the background at startup so the first recommendations request is fast. They do nothing without `LLM_API_KEY`
+- [x] `backend/.env` needs `LLM_API_KEY` and `LLM_MODEL=gemini-3.5-flash-lite` for real explanations (see `.env.example`); without them the API still works and returns template text
 
 **Acceptance criteria:**
-- [ ] `curl localhost:5000/api/personas` returns 3 personas
-- [ ] `curl localhost:5000/api/customers/p1/dashboard` matches `docs/sample_responses/dashboard_p1.json` key for key
-- [ ] `curl localhost:5000/api/customers/nope/dashboard` → 404 JSON
+- [x] `curl localhost:5000/api/personas` returns 3 personas
+- [x] `curl localhost:5000/api/customers/p1/dashboard` has every key from `docs/sample_responses/dashboard_p1.json` (plus 3 extras, below)
+- [x] `curl localhost:5000/api/customers/nope/dashboard` → 404 JSON
 
 **How to verify:** run the three curls above. The frontend can also hit them from the browser without CORS errors.
+
+**What changed / what to know (read this if you build on NM-8):**
+- **`services/customer_profile.py` → `build_profile(customer_id)`** is the single place that builds a customer profile. It returns exactly the shape of the engine's `fixtures.py`, so **the engine and the dashboard share it**. Samu: engine tests can use `build_profile()` instead of hand-typed fixtures. `list_personas()` feeds `/api/personas`.
+- **Dashboard = `build_profile()` + `equity` + `equity_timeline`.** Extra keys beyond the contract: `miles_per_year`, `vehicle_targets`, `vehicle.catalog_id`. The engine needs them; the UI can ignore them.
+- **Computed fields:** lease `apr` = money factor × 2400 (4.2), lease `payoff` = residual, lease `miles_projected_at_end` via `projected_end_miles`; loan `payoff` via `loan_balance` (rounded to 2 decimals).
+- **Error handling lives in `app.py`, not in routes:** `CustomerNotFound` → 404, Flask HTTP errors → JSON with their code, any other exception → logged traceback + `500 {"error": ...}`. Routes stay free of try/except.
+- **Python 3.10+ is required** (the engine uses `str | None`). Create the venv with `python3.11 -m venv .venv`; macOS's built-in Python 3.9 crashes.
+- **macOS:** if port 5000 returns 403, turn off System Settings → General → AirDrop & Handoff → AirPlay Receiver.
 
 ### ✅ NM-9 · Persona picker + dashboard (static) `E4` `P0` · 5 pts · **Jose**
 *As a customer, I want to see my car, my contract and my money at a glance.*
@@ -424,6 +441,7 @@ The list shows the top 3 `recommendations`. Below it, a muted line: "We also con
 - **"We also considered N other options":** N = `considered` items whose `id` isn't in the top 3 (p1 → 1). It links to `#all-options`, a wrapper `<div>` around `<ComparisonTable>` in `Dashboard.jsx`.
 - **Formatting:** `formatSignedWholeCurrency` in `format.js` rounds the delta to whole dollars (9.97 → "+$10"). The amber delta uses the new `--color-warning` / `--color-warning-bg` tokens. A `term_months` of 0 shows as "—".
 - **Not done yet:** `previous_rank` ("↑ was #2") isn't rendered (NM-19), and "Why this?" is a no-op until NM-20 passes `onWhyThis`.
+- **Until NM-15:** every persona shows p1's sample cards (Maya's Corolla), because `api.js` returns `recommendations_p1.json` for all customers.
 
 ---
 
@@ -431,7 +449,7 @@ The list shows the top 3 `recommendations`. Below it, a muted line: "We also con
 
 > **6 PM: someone attends the Toyota workshop (GDC 1.304).** Ask: (1) what makes a winning demo for them, (2) do they have sample data or real fee/APR ranges we should use, (3) which next steps (self-service vs follow-up) matter most to TFS. Post the answers in the team chat.
 
-### ✅ NM-11 · Affordability guardrails + ranking `E1` `P0` · 3 pts · **Samu**
+### NM-11 · Affordability guardrails + ranking `E1` `P0` · 3 pts · **Samu**
 *As a customer, I only want recommendations I can actually afford, in a sensible order.*
 
 **Context:** This is the responsible-AI core and the main judging point. The engine, not the LLM, decides what's affordable and what ranks first, and it always says why something was rejected.
@@ -468,28 +486,23 @@ Rules 1–2 skip options that *lower* the payment (relief options, refinance).
 Every `considered` item gets `affordable: bool` and `rejection_reason: str | null`.
 
 **Tasks:**
-- [x] Implement the 3 rules with human-readable reasons (numbers inside, formatted)
-- [x] Ranking function exactly as above
-- [x] `talk_to_advisor` card
-- [x] `recommend()` wiring: build options → check affordability → rank → top 3
-- [x] Tests for each rule, the handoff, and each persona's expected #1 (Appendix B)
+- [ ] Implement the 3 rules with human-readable reasons (numbers inside, formatted)
+- [ ] Ranking function exactly as above
+- [ ] `talk_to_advisor` card
+- [ ] `recommend()` wiring: build options → check affordability → rank → top 3
+- [ ] Tests for each rule, the handoff, and each persona's expected #1 (Appendix B)
 
 **Acceptance criteria:**
-- [x] p1 → #1 `lease_buyout`, #2 `buy_miles_new_lease`; `return_new_lease` rejected by rule 3 *(`return_walk_away` is also rejected by rule 3, not ranked last; see the note below)*
-- [x] p2 → #1 `keep`, #2 `trade_in_upgrade` (Highlander, affordable at baseline)
-- [x] p3 → #1 `trade_in_upgrade` (goal `newer_vehicle`), #2 `refinance`, #3 `keep`
-- [x] Every rejected option has a non-empty `rejection_reason`
+- [ ] p1 → #1 `lease_buyout`, #2 `buy_miles_new_lease`, last `return_walk_away`; `return_new_lease` rejected by rule 3
+- [ ] p2 → #1 `keep`, #2 `trade_in_upgrade` (Highlander, affordable at baseline)
+- [ ] p3 → #1 `trade_in_upgrade` (goal `newer_vehicle`), #2 `refinance`, #3 `keep`
+- [ ] Every rejected option has a non-empty `rejection_reason`
 
 > **Status after the NM-18 merge (found during NM-13):** `recommend(P1)` now returns `lease_buyout` #1 and `buy_miles_new_lease` #2 (the earlier rule 1 rejection is fixed), and the guardrails tests pass. Two things differ from the criteria above and from NM-10's 3-card p1 sample: p1 gets **2** recommendations, because `return_walk_away` is now rejected by rule 3 ("Upfront cost of $1,670 would leave $930 in savings, less than one month of bills ($1,150)"), and `return_new_lease` is rejected for the same reason. If the demo needs a third card for p1, that's a data or rule decision for Samu and Rodrigo. The cards and `RecommendationList` handle 2 cards fine. Reminder: the LLM repeats `rejection_reason` to the customer, so this wording is customer-facing.
 
 **How to verify:** `pytest backend/engine/tests -v`, then print `recommend(profile)` for each persona.
 
-**Done (Samu, merged into `dev`):** `guardrails.py` (`check_affordability`, `is_relief_needed`, `GOAL_MATCHES`, `rank_options`) and `recommend.py` (`recommend()`, the pinned `talk_to_advisor` card, `previous_rank`, `finances_after_event`). Covered by `test_guardrails.py`, and end to end by Rodrigo's `test_personas.py`.
-- **Actual results on `dev`:** p1 → `lease_buyout`, `buy_miles_new_lease` (2 cards); `return_new_lease` **and** `return_walk_away` rejected by rule 3 ($930 left < $1,150 of bills). p2 → `keep`, `trade_in_upgrade`. p3 → `trade_in_upgrade`, `refinance`, `keep`. The first acceptance line expected `return_walk_away` last; it's rejected instead, which is intended (same $1,670 upfront).
-- **Relief / handoff:** `relief_needed` when `monthly_surplus < 0` (`RELIEF_SURPLUS_MIN = 0`), and then `talk_to_advisor` is pinned at #1.
-- **Open follow-up:** the rule 1 message still prints the percentage with no decimals, so a 15.4% payment reads "15% of your income (limit 15%)". It doesn't trigger for any persona today, but it's customer-facing through the LLM (see the NM-13 note). Fix: `{pct:.1f}%` in `check_affordability`.
-
-### NM-12 · Recommendations endpoint `E2` `P0` · 2 pts · **Rodrigo**
+### ✅ NM-12 · Recommendations endpoint `E2` `P0` · 2 pts · **Rodrigo**
 *As the frontend, I need ranked recommendations from one API call.*
 
 **Context:** This is where the engine and the API meet. Keep the route thin: load the profile, call `recommend()`, attach explanations (NM-13), return. No math in the route.
@@ -505,19 +518,26 @@ Every `considered` item gets `affordable: bool` and `rejection_reason: str | nul
 - Engine exceptions → `500 { error }`, logged with a traceback (never crash the demo)
 
 **Tasks:**
-- [ ] Route + body validation
-- [ ] Call `engine.recommend.recommend(profile, life_event)`
-- [ ] Call Jose's `services.llm.explain_all(recommendations, profile, life_event)` and copy `text` → `explanation`, `source` → `explanation_source` on each recommendation. Until NM-13 lands, Jose pushes a stub that returns template text, so this works from the start
-- [ ] Also return `finances_after_event` (from Samu's `recommend()` output) so the finance snapshot can update during What-if
-- [ ] Pass each option's `action` through unchanged, including `action.confirmation` (added by NM-10; the card shows it as the click toast)
-- [ ] `explain_all` (NM-13) is final and never raises; call it with `recommend()`'s top 3. **Round money once before calling it** (`round(x, 2)`) so the text and the card show the same cents. `explain_all` formats with the same rounding, but an unrounded 797.325 can print as $797.32 in the text and $797.33 on the card
+- [x] Route + body validation (`read_life_event()`)
+- [x] Call `engine.recommend.recommend(profile, life_event)`
+- [x] Call Jose's `services.llm.explain_all(recommendations, profile, life_event)` and copy `text` → `explanation`, `source` → `explanation_source` on each recommendation
+- [x] Also return `finances_after_event` (from Samu's `recommend()` output) so the finance snapshot can update during What-if
+- [x] Pass each option's `action` through unchanged, including `action.confirmation` (added by NM-10; the card shows it as the click toast)
+- [ ] `explain_all` (NM-13) is final and never raises; call it with `recommend()`'s top 3. **Round money once before calling it** so the text and the card show the same cents. Currently the route rounds *after*; fix: `result = round_money(recommend(profile, life_event))`, then call `explain_all`, then `return jsonify(result)`
 
 **Acceptance criteria:**
-- [ ] `curl -X POST .../p1/recommendations -H 'Content-Type: application/json' -d '{"life_event":null}'` returns 3 ranked recommendations with p1's numbers
-- [ ] An invalid life event returns 400 with the allowed list
+- [x] `curl -X POST .../p1/recommendations -H 'Content-Type: application/json' -d '{"life_event":null}'` returns ranked recommendations with p1's numbers (**2 cards, not 3**: see NM-11 and NM-18)
+- [x] An invalid life event returns 400 with the allowed list
 - [ ] *(NM-13 end-to-end check)* with `LLM_API_KEY` set, the p1 response has `explanation_source: "llm"` on each card and the text uses p1's numbers; with the key unset or wrong, the response is still 200 and uses `"template"`. Use `gemini-3.5-flash-lite`: free tier is 5 requests per minute, so wait between curls
 
 **How to verify:** the curl above, and compare against Samu's printed `recommend()` output.
+
+**What changed / what to know (read this if you build on NM-12):**
+- **Allowed events:** `ALLOWED_LIFE_EVENTS = ["new_baby", "income_drop", "longer_commute"]` in `routes.py`. Add `job_change` / `move` there if NM-17's P1 events ship.
+- **A missing `params`** defaults to `{}` so the engine uses its defaults. A body that isn't JSON counts as no life event.
+- **Rounding:** `round_money()` rounds every float to 2 decimals at the API boundary, **except keys in `NOT_MONEY_KEYS`** (`money_factor`, which would otherwise become 0.0). Add any other non-money decimal there.
+- **Errors:** unknown customer → 404 and engine crash → logged 500, both handled by `app.py` (NM-8).
+- **Verified:** p2 + `new_baby` → `keep` #1, Highlander rejected ("Adds $233/mo; your monthly surplus is $400 (limit $200)"); `life_event_applied` and `finances_after_event` are filled.
 
 ### ✅ NM-13 · LLM explanations `E3` `P0` · 3 pts · **Jose**
 *As a customer, I want a plain-English reason for each recommendation.*
@@ -617,7 +637,7 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 
 **Context:** This is the integration moment for Milestone M2. After this, everything on screen comes from the backend.
 
-**Blocked by:** NM-8, NM-10, NM-12
+**Blocked by:** NM-8, NM-10, NM-12 *(all done; the API is live)*
 
 **Files:** `frontend/src/api.js`, `frontend/vite.config.js` (proxy)
 
@@ -634,6 +654,7 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 - [ ] Check that the live response carries `action.confirmation` (NM-10 contract change). If it doesn't, the toast quietly falls back to generic text, so check the wording on each card
 - [ ] Timing to plan the skeletons for (NM-13/NM-14): an LLM response takes about 1 s once the server has warmed up (up to about 3.5 s on the first request after a quiet period), and the backend stops waiting after 6 s and returns template text with `explanation_source: "template"`. The request still returns 200 with all explanations filled, so the UI never needs an "explanation failed" state; it only needs the normal loading and error states for the request itself
 - [ ] The POST can be slow while the free-tier LLM quota (5 requests per minute) is exhausted, but it still succeeds with templates. Don't auto-retry on every What-if click or you'll burn the quota; NM-21's cache removes the problem for the demo
+- [ ] The live API returns **2** cards for p1 (see NM-11), and the dashboard includes `equity_timeline` (NM-23) plus extra keys `miles_per_year`, `vehicle_targets`, `vehicle.catalog_id` (NM-8), which the UI can ignore
 
 **Acceptance criteria:**
 - [ ] p1 flows picker → dashboard → live cards with LLM explanations
@@ -641,7 +662,7 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 
 **How to verify:** run both servers, click through p1, then kill Flask and reload.
 
-### NM-16 · Soft submission `E6` `P0` · 1 pt · **Rodrigo**
+### ✅ NM-16 · Soft submission `E6` `P0` · 1 pt · **Rodrigo**
 *As a team, we lock in a submission early so nothing can go wrong at 11:29 AM tomorrow.*
 
 **Context:** The soft deadline is Sat 11:30 PM. A draft now means the final submission is just an edit.
@@ -649,17 +670,17 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 **Blocked by:** nothing (submit whatever exists at 11 PM).
 
 **Tasks:**
-- [ ] Create the project on hacktx26.devpost.com, add Jose and Samu as teammates
-- [ ] Name ("Next Move"), one-liner, 2 screenshots, GitHub link
-- [ ] Select the Toyota track
-- [ ] Placeholder sections: Inspiration / What it does / How we built it
+- [x] Create the project on hacktx26.devpost.com, add Jose and Samu as teammates
+- [x] Name ("Next Move"), one-liner, 2 screenshots, GitHub link
+- [x] Select the Toyota track
+- [x] Placeholder sections: Inspiration / What it does / How we built it
 
 **Acceptance criteria:**
-- [ ] Submitted before **11:30 PM Saturday**, with all three of us listed
+- [x] Submitted before **11:30 PM Saturday**, with all three of us listed *(Jose and Samu: accept the Devpost invite if you haven't yet)*
 
 ---
 
-### ✅ NM-17 · Life events `E1` `P0` · 3 pts · **Samu**
+### NM-17 · Life events `E1` `P0` · 3 pts · **Samu**
 *As a customer, I want to ask "what if?" and see my best move change.*
 
 **Context:** The "What if?" simulator is our differentiator, and it creates the demo's key moment: the Reyes family's Highlander gets **rejected as unaffordable** after the baby.
@@ -684,50 +705,52 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 `recommend()` applies the event before building options, and returns `life_event_applied` with a one-line human summary ("Income down 20% → monthly surplus now −$340").
 
 **Tasks:**
-- [x] 3 P0 events *(the 2 P1 events, `job_change` and `move`, were not built)*
-- [x] Event summary string
-- [x] Tests per event against Appendix B's expected outcomes
+- [ ] 3 P0 events (+2 P1 if time allows)
+- [ ] Event summary string
+- [ ] Tests per event against Appendix B's expected outcomes
 
 **Acceptance criteria:**
-- [x] p2 + `new_baby` → surplus $900 → $400; Highlander (+$233/mo) **rejected** by rule 2 (limit $200); #1 is `keep`
-- [x] p2 + `income_drop` 20% → surplus −$340 → `relief_needed` → #1 `talk_to_advisor`, followed by `extend_term` (≈ $439.52) and `payment_deferral`
-- [x] p1 + `longer_commute` → overage grows to 7,100 mi; `buy_miles_new_lease` becomes rejected (rule 3); buyout stays #1
-- [x] The original profile object is unchanged after `apply_life_event`
+- [ ] p2 + `new_baby` → surplus $900 → $400; Highlander (+$233/mo) **rejected** by rule 2 (limit $200); #1 is `keep`
+- [ ] p2 + `income_drop` 20% → surplus −$340 → `relief_needed` → #1 `talk_to_advisor`, followed by `extend_term` (≈ $439.52) and `payment_deferral`
+- [ ] p1 + `longer_commute` → overage grows to 7,100 mi; `buy_miles_new_lease` becomes rejected (rule 3); buyout stays #1
+- [ ] The original profile object is unchanged after `apply_life_event`
 
 **How to verify:** `pytest backend/engine/tests/test_events.py -v`
 
 > NM-17 sits in Sprint 2 so Samu's evenings are balanced: it only needs NM-11, and finishing it early unblocks the What-if panel and persona tuning.
+> If `job_change` / `move` ship, tell Rodrigo to add them to `ALLOWED_LIFE_EVENTS` in `routes.py` (NM-12).
 
 ---
 
-**Done (Samu, merged into `dev`):** `events.py` (`ALLOWED_EVENTS`, `DEFAULT_PARAMS`, `apply_life_event`, `describe_life_event`) plus the commute miles in `options.py`. Covered by `test_events.py`. All four expected outcomes pass on `dev`:
-- p2 + `new_baby` → "Baby on the way (+$500/mo) → monthly surplus now $400"; only `keep`; the Highlander is rejected with `previous_rank: 2`.
-- p2 + `income_drop` 20% → "Income down 20% → monthly surplus now −$340"; `talk_to_advisor`, `extend_term`, `payment_deferral`.
-- p1 + `longer_commute` → "projected 7,100 miles over your lease"; `lease_buyout` stays #1; prepaid miles ($1,460 upfront) rejected.
-- The input profile is never mutated.
-- **For NM-12 (Rodrigo):** import `ALLOWED_EVENTS` from `engine.events` for the 400 check. Invalid params raise `ValueError`, which maps to a 400.
-- `job_change` and `move` (P1) were not built.
-
 ## Sprint 3 — Full MVP (Sat 10:30 PM → Sun 3:00 AM)
 
-### NM-18 · Tune personas `E1`+`E2` `P0` · 2 pts · **Rodrigo + Samu**
+### ✅ NM-18 · Tune personas `E1`+`E2` `P0` · 2 pts · **Rodrigo + Samu**
 *As a demo, each persona must tell a clean, believable story.*
 
 **Context:** Appendix B's numbers were pre-checked, but real implementations drift (rounding, fees, mock-data noise). This story is the end-to-end check that the engine, the data and the demo script agree.
 
 **Blocked by:** NM-11, NM-17, NM-7
 
-**Files:** `backend/data/toyota_profiles.json`, `backend/data/mock_bank/*.json`, `backend/engine/tests/test_personas.py`
+**Files:** `backend/data/vehicle_catalog.json`, `backend/engine/constants.py`, `backend/engine/tests/test_personas.py`, `backend/engine/tests/test_options.py`
 
 **Tasks:**
-- [ ] Integration test: for every row of the Appendix B "expected outcomes" table, assert the #1 option id
-- [ ] If an assertion fails, adjust **data**, not rules (change the constants only if the data can't fix it, and tell the team)
-- [ ] Sanity-read every explanation for every persona/event combo (NM-13 notes: the model sometimes adds small unsupported claims, and it repeats `rejection_reason` verbatim, so reword confusing reasons in the engine, not the prompt)
-- [ ] Decide whether p1 should show 3 cards: after the NM-11 fix the engine returns 2 (see the NM-11 status note), while the NM-10 sample and the demo script show 3
+- [x] Integration test: for every row of the Appendix B "expected outcomes" table, assert the #1 option (`backend/engine/tests/test_personas.py`)
+- [x] If an assertion fails, adjust **data**, not rules (2027 Corolla MSRP, see below)
+- [ ] Sanity-read every explanation for every persona/event combo (now possible: NM-13/14 are merged). NM-13 notes: the model sometimes adds small unsupported claims, and it repeats `rejection_reason` verbatim, so reword confusing reasons in the engine, not the prompt
+- [x] Decide whether p1 should show 3 cards: **keep 2** (`lease_buyout`, `buy_miles_new_lease`). `return_new_lease` and `return_walk_away` are correctly rejected by rule 3 for Maya's savings, and the UI handles 2 cards. Update the demo script (plan §12) and the NM-10 sample if they still show 3
 
 **Acceptance criteria:**
-- [ ] `test_personas.py` passes for all 8 persona/event combinations in Appendix B
-- [ ] Each persona's #1 card matches the demo script (plan §12)
+- [x] `test_personas.py` passes for all 8 persona/event combinations in Appendix B (10 tests total)
+- [x] Each persona's #1 card matches the demo script (plan §12)
+
+**How to verify:** `cd backend && python -m pytest engine/tests/test_personas.py -v`
+
+**What changed / what to know (read this if you build on NM-18):**
+- **2027 Corolla LE MSRP 23,500 → 22,500.** At 23,500 the new lease was $324.20, which is 15.4% of Maya's income, so rule 1 rejected `buy_miles_new_lease`. Now it's **$310.40** and ranks #2. `test_options.py` was updated to 310.40 (Samu approved).
+- **`constants.py` now loads `VEHICLE_CATALOG` from `backend/data/vehicle_catalog.json`** (Samu approved). The duplicate hand-typed catalog is gone, so car data lives in one place.
+- **`test_personas.py` compares `kind`, not `id`**, because ids include the target car (`trade_in_upgrade:camry_hybrid_se_2027`).
+- **Extra checks:** Maya's top 2 are `lease_buyout`, `buy_miles_new_lease`; Reyes + `new_baby` → Highlander `affordable: false` with a non-empty reason.
+- **Uses the real pipeline:** `build_profile()` (data, NM-8) → `recommend()` (engine). If data or engine changes break the demo story, this test fails.
 
 ### NM-19 · What-if panel `E4` `P0` · 3 pts · **Samu**
 *As a customer, I want to try a life change and instantly see how my best move changes.*
@@ -830,6 +853,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 
 **From NM-10:** the cards' "We also considered N other options" link points to `#all-options`, a `<div>` that `Dashboard.jsx` already wraps around `<ComparisonTable>`, so you don't need to add an id. `considered` includes the top 3 as well as the rejected options. Rejected items carry only `id, title, monthly_payment, delta_monthly, upfront_cost, total_cost, affordable, rejection_reason` (no `rank`), so sort them after the ranked ones.
 
+**From NM-12 (live API):** in the live response, rejected options are full option objects with `rank: null` (not the reduced shape above), and every item has `kind`. Sort by `rank` with `null` last.
+
 **Acceptance criteria:**
 - [ ] Shows every `considered` item, with reasons for rejected ones
 - [ ] Updates with the What-if panel
@@ -838,23 +863,35 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 
 ## Sprint 4 — Polish + stretch (Sun 3:00 → 8:30 AM)
 
-### NM-23 · Equity / payment chart `E4` `P1` · 3 pts · **Rodrigo**
+### NM-23 · Equity / payment chart `E4` `P1` · 3 pts · **Rodrigo** · 🟡 backend done, chart waits on NM-15
 *As a customer, I want to see when my car is worth more than I owe.*
 
 **Context:** Feeds the "Equity tracker" feature from our pitch. It's visual proof of why p3 should upgrade now.
 
-**Blocked by:** NM-8 for the backend half (**start it in Sprint 2** while waiting on NM-11), and NM-15 for the chart. Rodrigo owns both halves; ask Samu to review the amortization use.
+**Blocked by:** NM-8 for the backend half (✅ done), and NM-15 for the chart. Rodrigo owns both halves; ask Samu to review the amortization use.
 
-**Files:** `frontend/src/components/EquityChart.jsx`; backend: `services/equity.py` (`equity_timeline`, built on Samu's `engine.finance` functions), `routes.py` (add `equity_timeline` to the dashboard response)
+**Files:** `frontend/src/components/EquityChart.jsx` ⏳; backend: `services/equity.py` ✅ (`equity_timeline`, built on Samu's `engine.finance` functions), `routes.py` ✅ (`equity_timeline` is in the dashboard response)
 
 **Spec:**
 - Backend: `equity_timeline(profile, months=24) -> [{ month, value, payoff }]` (value depreciates at `DEPRECIATION_PER_YEAR`, payoff from the amortization schedule)
 - Recharts `LineChart`: two lines (value, payoff), shaded area between them (green where value > payoff), a "Today" marker
 - Lease customers: plot residual vs estimated value instead
 
+**Tasks:**
+- [x] Backend: `equity_timeline()` in `services/equity.py`
+- [x] Add `equity_timeline` to the dashboard response
+- [ ] Recharts chart in `EquityChart.jsx`
+- [ ] Ask Samu to review the amortization use
+
 **Acceptance criteria:**
 - [ ] p3's chart clearly shows positive equity today
 - [ ] Renders for all 3 personas without errors
+
+**What changed / what to know (read this if you build on NM-23):**
+- **Value:** `est_value × (1 − DEPRECIATION_PER_YEAR) ^ (month / 12)`, a smooth monthly drop of 12% per year.
+- **Payoff:** loans use `loan_balance(today's payoff, apr, months_remaining, month)`, i.e. today's balance paid down by the remaining payments (never below 0); leases use the residual (flat).
+- **Length:** stops at the contract end → p1 has **5 points** (months 0–4); p2 and p3 have **25** (months 0–24).
+- **p3 check:** month 0 → value 21,000 / payoff 12,615.04; month 12 → 18,480 / 8,817.15; month 24 → 16,262.40 / 4,625.73.
 
 ### NM-24 · UI polish pass `E4` `P1` · 3 pts · **Jose**
 *As judges, we should think "this could ship".*
@@ -876,7 +913,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 
 **Context:** Only worth doing if Nessie is reachable. It qualifies us for Capital One's Best Use of Nessie ($250 per member), using the adapter built in NM-7.
 
-**Blocked by:** NM-7, and Nessie being reachable (confirm the base URL with Capital One in the WEL hallway or on Discord)
+**Blocked by:** NM-7 (✅ done), and Nessie being reachable (confirm the base URL with Capital One in the WEL hallway or on Discord)
 
 **Files:** `backend/services/nessie.py`, `backend/scripts/seed_nessie.py`, `backend/data/nessie_ids.json`
 
@@ -886,6 +923,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - `nessie.py`: `GET /customers/{id}/accounts`, `/accounts/{id}/deposits`, `/purchases`, `/bills` → the same normalization as NM-7
 - Map our `customer_id` (p1) → Nessie id via `nessie_ids.json`
 - 5-second timeout; on failure, fall back to mock and set `source: "mock (Nessie unavailable)"`
+
+**From NM-7:** the math is already reusable. `nessie.py` only needs to return data in the mock file shape; then call `profile.calculate_monthly_finances(bank_data, source="nessie")` and add the `"nessie"` branch to `get_financial_profile`.
 
 **Acceptance criteria:**
 - [ ] `DATA_MODE=nessie` → the dashboard shows `source: "nessie"` with the same normalized numbers as mock (±$5)
@@ -921,6 +960,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - Cache responses to disk (demo-safe)
 - If any recalls exist, add a `recall_service` card (`action.kind: follow_up`, "Book a free recall repair") pinned above the rankings. It's safety, not a financial option.
 
+**From NM-8:** `build_profile()` already provides `vehicle.model` and `vehicle.year` for the NHTSA query.
+
 **Acceptance criteria:**
 - [ ] Works offline from cache
 - [ ] Shows the real recall title and NHTSA campaign number
@@ -931,7 +972,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 **Tasks:**
 - [ ] Edge cases: 0 months remaining, negative equity on trade-in (roll the negative equity into the new loan and say so in trade-offs), zero/negative surplus, income drop of 40%+, missing optional fields
 - [ ] Fuzz test: random life-event params for all personas; assert no exceptions and that all numbers are finite
-- [ ] Round money to 2 decimals at the API boundary only
+- [ ] Round money to 2 decimals at the API boundary only *(already done in `routes.py` by `round_money()`, NM-12; the engine should keep returning unrounded numbers)*
 
 **Acceptance criteria:**
 - [ ] Fuzz test runs 500 random cases with no exceptions
@@ -979,6 +1020,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - [ ] **Built with** tags; screenshots of every screen; video link; public repo
 - [ ] Tracks: Toyota (+ Capital One if NM-25 is done, + Gemini MLH prize if used)
 
+**Note:** the project already exists on Devpost from NM-16 (soft submission). This is an edit of that draft, not a new project.
+
 **Acceptance criteria:**
 - [ ] Submitted before **11:30 AM Sunday**; all 3 teammates confirm they're listed
 
@@ -990,6 +1033,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - [ ] Each person rehearses the 2-minute pitch once out loud
 - [ ] Prepare answers: "Where does the data come from?", "What if the LLM is wrong?", "How would TFS deploy this?", "Why these affordability thresholds?"
   - *"What if the LLM is wrong?"* (NM-14): the LLM never computes. It gets pre-calculated, pre-formatted numbers, and a validator checks every digit it writes against the engine's output. One unknown number means that card shows a deterministic template instead. Live demo: `pytest backend/tests/test_validator.py -v` shows "only $199/mo at 2.9%" being rejected. Limit to admit if asked: numbers spelled out as words aren't checked
+  - *"Where does the data come from?"* (NM-6/7): synthetic Toyota contracts and a vehicle catalog we wrote, plus bank data shaped exactly like Capital One's Nessie API, generated by a seeded script. One env var (`DATA_MODE`) switches to live Nessie
 - [ ] Laptop setup for judging: charger, `CACHE_ONLY=true`, browser zoom tested, tabs pre-opened
 
 **Acceptance criteria:**
@@ -1003,7 +1047,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 | | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 | Sprint 5 | **P0/P1 total** | P2 stretch |
 |---|---|---|---|---|---|---|---|
 | **Samu** | NM-4, NM-5 (8) | NM-11, NM-17 (6) | NM-19, NM-18* (5) | NM-28 (2) | pitch deck lead | **21** | — |
-| **Rodrigo** | NM-6, NM-7, NM-8 (8) | NM-12, NM-16 + start NM-23 backend (3) | NM-18*, NM-22 (4) | NM-23 (3) | NM-30 (3) | **21** | NM-25, NM-27 (7) |
+| **Rodrigo** | ✅ NM-6, NM-7, NM-8 (8) | ✅ NM-12, ✅ NM-16 + ✅ NM-23 backend (3) | ✅ NM-18*, NM-22 (4) | NM-23 chart (3) | NM-30 (3) | **21** | NM-25, NM-27 (7) |
 | **Jose** | NM-9, NM-10 (8) | NM-13, NM-14, NM-15 (7) | NM-20, NM-21 (3) | NM-24 (3) | NM-31 (2) | **23** | NM-26 (3) |
 
 \* NM-18 is shared: Rodrigo leads (it's data), Samu supports (it's engine expectations). Counted for both.
@@ -1044,39 +1088,41 @@ All values are **synthetic demo assumptions**, shown to users as such. Change th
 
 | id | Label | MSRP | MPG | Lease residual % |
 |---|---|---|---|---|
-| `corolla_le_2027` | 2027 Corolla LE | 23,500 | 35 | 62% |
+| `corolla_le_2027` | 2027 Corolla LE | 22,500 | 35 | 62% |
 | `rav4_xle_2022` | 2022 RAV4 XLE | — | 30 | — |
 | `highlander_xle_2027` | 2027 Highlander XLE | 45,500 | 25 | 58% |
 | `camry_se_2021` | 2021 Camry SE | — | 32 | — |
 | `camry_hybrid_se_2027` | 2027 Camry Hybrid SE | 32,500 | 51 | 60% |
 | `corolla_le_2023` | 2023 Corolla LE | — | 35 | — |
 
+> **Source of truth:** `backend/data/vehicle_catalog.json`, loaded by `constants.py` since NM-18. The JSON also has `year`, `model` and `trim` for every car. The 2027 Corolla MSRP was lowered from 23,500 in NM-18.
+
 ## Appendix B — Personas (exact numbers)
 
 ### p1 — Maya Lopez · "College senior · Corolla lease ending · over on miles"
-- **Goals:** `["keep_a_car_after_graduation"]` · **Miles/year:** 11,700
+- **Goals:** `["keep_a_car_after_graduation"]` · **Miles/year:** 11,700 · **Targets:** `["corolla_le_2027"]`
 - **Vehicle:** 2023 Corolla LE (`corolla_le_2023`), 31,200 mi, est. value **$18,900**
 - **Contract:** lease · cap cost $22,500 · residual **$14,600** · MF 0.00175 · 36 mo · **32 elapsed / 4 remaining** · payment **$284.37** · allowed 30,000 mi total
 - **Projected:** 35,100 mi at lease end → **5,100 over → $1,275 fee**
-- **Finances:** income **$2,100** · bills **$1,150** (incl. car) · spending **$520** · surplus **$430** · savings **$2,600** · checking $640
+- **Finances:** income **$2,100** · bills **$1,150** (incl. car; mock data: 1,149.37) · spending **$520** · surplus **$430** · savings **$2,600** · checking $640
 
 ### p2 — The Reyes family · "Expecting a baby · financed RAV4"
 - **Goals:** `["keep_payments_predictable"]` · **Miles/year:** 13,000 · **Targets:** `["highlander_xle_2027"]`
 - **Vehicle:** 2022 RAV4 XLE, 41,000 mi, est. value **$24,000**
 - **Contract:** loan · $30,000 at **4.9%** · 60 mo · **22 paid / 38 remaining** · payment **$564.76** · payoff **≈ $19,841** → equity **≈ +$4,159**
-- **Finances:** income **$6,200** · bills **$3,600** (incl. car) · spending **$1,700** · surplus **$900** · savings **$9,000** · checking $2,100
+- **Finances:** income **$6,200** · bills **$3,600** (incl. car; mock data: 3,599.76) · spending **$1,700** · surplus **$900** · savings **$9,000** · checking $2,100
 
 ### p3 — Daniel Kim · "Positive equity · high-APR Camry loan"
 - **Goals:** `["newer_vehicle", "lower_fuel_cost"]` · **Miles/year:** 12,000 · **Targets:** `["camry_hybrid_se_2027"]`
 - **Vehicle:** 2021 Camry SE, 48,000 mi, est. value **$21,000**
 - **Contract:** loan · $22,000 at **9.9%** · 72 mo · **36 paid / 36 remaining** · payment **$406.46** · payoff **≈ $12,615** → equity **≈ +$8,385**
-- **Finances:** income **$6,500** · bills **$2,800** (incl. car) · spending **$1,500** · surplus **$2,200** · savings **$15,000** · checking $3,400
+- **Finances:** income **$6,500** · bills **$2,800** (incl. car; mock data: 2,801.46) · spending **$1,500** · surplus **$2,200** · savings **$15,000** · checking $3,400
 
 ### Expected outcomes (NM-18 asserts these)
 
 | Persona + event | Key numbers | Expected #1 | Notes |
 |---|---|---|---|
-| p1 baseline | buyout $294.34 (+$9.97) · buy-miles upfront $1,160 · return upfront $1,670 | `lease_buyout` | `return_new_lease` rejected (rule 3: $2,600 − $1,670 < $1,150) |
+| p1 baseline | buyout $294.34 (+$9.97) · buy-miles upfront $1,160, new lease $310.40 · return upfront $1,670 | `lease_buyout` | #2 `buy_miles_new_lease`; `return_new_lease` and `return_walk_away` rejected (rule 3: $2,600 − $1,670 < $1,150) → **2 cards** |
 | p1 + longer_commute | +2,000 projected miles → 7,100 over · buy-miles upfront $1,460 | `lease_buyout` | Buy-miles now **rejected** too (rule 3: $2,600 − $1,460 < $1,150) |
 | p2 baseline | keep $564.76 · Highlander ≈ $797.33 (+$233) | `keep` | Highlander affordable (#2); no refinance (4.9% < 6.4%) |
 | p2 + new_baby | surplus $900 → $400 | `keep` | Highlander **rejected** (rule 2: $233 > $200) ← demo moment |
