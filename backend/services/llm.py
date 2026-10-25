@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -125,9 +126,64 @@ def _call_with_deadline(system: str, user: str) -> str:
     return _pool.submit(_call_llm, system, user).result(timeout=TIMEOUT_S)
 
 
+# --- Number validator (NM-14): the LLM may only repeat numbers the engine computed ---
+
+# 1,275 / 1,275.00 / 6.9 / 60 (the "$", "%" and "-month" around them don't matter)
+NUMBER_RE = re.compile(r"\d+(?:,\d{3})*(?:\.\d+)?")
+# Small integers read as words ("2 options", "1 business day") are not claims
+IGNORED_SMALL_INTS = {1, 2, 3}
+
+# How many LLM explanations the validator has thrown away since the server started
+hallucinations_caught = 0
+
+
+def extract_numbers(text: str) -> set[float]:
+    return {float(m.replace(",", "")) for m in NUMBER_RE.findall(text)}
+
+
+def _numbers_in(value) -> set[float]:
+    """Every number in a value: numeric fields and numbers written inside strings, at any depth."""
+    if isinstance(value, bool):
+        return set()
+    if isinstance(value, (int, float)):
+        return {abs(float(value))}
+    if isinstance(value, str):
+        return extract_numbers(value)
+    if isinstance(value, dict):
+        return set().union(*(_numbers_in(v) for v in value.values()))
+    if isinstance(value, (list, tuple, set)):
+        return set().union(*(_numbers_in(v) for v in value))
+    return set()
+
+
+def _with_rounded_variants(numbers: set[float]) -> set[float]:
+    """Raw values plus 2-decimal and whole-number versions ($294.34 may be said as $294)."""
+    out = set()
+    for n in numbers:
+        out |= {n, round(n, 2), float(round(n))}
+    return out
+
+
+def allowed_numbers(option: dict) -> set[float]:
+    return _with_rounded_variants(_numbers_in(option))
+
+
+def _unsupported_numbers(text: str, option: dict, extra: set[float]) -> set[float]:
+    allowed = allowed_numbers(option) | _with_rounded_variants(extra)
+    return {
+        n for n in extract_numbers(text)
+        if n not in IGNORED_SMALL_INTS and n not in allowed and round(n, 2) not in allowed
+    }
+
+
+def validate(text: str, option: dict, extra: set[float] = frozenset()) -> bool:
+    """True when every number in the text comes from the option (or `extra`, e.g. life-event params)."""
+    return not _unsupported_numbers(text, option, extra)
+
+
 def explain_all(recommendations: list[dict], profile: dict, life_event: dict | None) -> dict[str, dict]:
-    """One LLM call for all options. Any problem falls back to the template, per option.
-    Returns { option_id: { "text": str, "source": "llm" | "template" } }. Never raises."""
+    """One LLM call for all options. Any problem falls back to the template, per option, including
+    text that fails the number validator. Returns { option_id: { "text": str, "source": "llm" | "template" } }. Never raises."""
     out = {r["id"]: {"text": template_explanation(r), "source": "template"} for r in recommendations}
     if not recommendations or not os.environ.get("LLM_API_KEY"):
         return out
@@ -141,9 +197,21 @@ def explain_all(recommendations: list[dict], profile: dict, life_event: dict | N
         logger.warning("LLM explanation failed, using templates: %r", exc)
         return out
 
+    global hallucinations_caught
+    # The model also sees the life event, so its numbers ("$500 a month for the baby") are fair game
+    event_numbers = _numbers_in((life_event or {}).get("params", {}))
     for rec in recommendations:
         text = parsed.get(rec["id"])
-        if isinstance(text, str) and text.strip():
-            # NM-14: validate(text, rec) here; keep the template when it fails
-            out[rec["id"]] = {"text": text.strip(), "source": "llm"}
+        if not (isinstance(text, str) and text.strip()):
+            continue
+        bad = _unsupported_numbers(text, rec, event_numbers)
+        if bad:
+            hallucinations_caught += 1
+            logger.warning(
+                "Validator rejected LLM text for %s (numbers not from the engine: %s); using template. "
+                "Caught %d so far. Text: %r",
+                rec["id"], sorted(bad), hallucinations_caught, text,
+            )
+            continue
+        out[rec["id"]] = {"text": text.strip(), "source": "llm"}
     return out
