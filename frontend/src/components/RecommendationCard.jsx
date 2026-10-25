@@ -51,7 +51,6 @@ export default function RecommendationCard({ rec, top = false, onAction, onWhyTh
           <button type="button" className={KIND_CLASS[action.kind]} onClick={() => onAction(rec)}>
             {action.label}
           </button>
-          {/* NM-20 passes onWhyThis to open the drawer; until then this is a no-op */}
           <button type="button" className="link-button" onClick={() => onWhyThis?.(rec)}>
             Why this?
           </button>

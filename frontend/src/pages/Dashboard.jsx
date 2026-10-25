@@ -11,6 +11,7 @@ import RecommendationList from '../components/RecommendationList.jsx'
 import RecommendationSkeleton from '../components/RecommendationSkeleton.jsx'
 import VehicleCard from '../components/VehicleCard.jsx'
 import WhatIfPanel from '../components/WhatIfPanel.jsx'
+import WhyDrawer from '../components/WhyDrawer.jsx'
 
 // Identifies one recommendations request, so a slow response for an old request is never shown
 const recsKey = (id, lifeEvent, attempt) => `${id}|${JSON.stringify(lifeEvent)}|${attempt}`
@@ -24,6 +25,8 @@ export default function Dashboard() {
   // Bumped by the Retry buttons to re-run a request
   const [dashboardAttempt, setDashboardAttempt] = useState(0)
   const [recsAttempt, setRecsAttempt] = useState(0)
+  // The card whose "Why this?" drawer is open, by id (looked up in the current response below)
+  const [whyId, setWhyId] = useState(null)
 
   useEffect(() => {
     let ignore = false
@@ -74,6 +77,8 @@ export default function Dashboard() {
   const { customer, vehicle, contract, finances, equity, equity_timeline } = dashboard.data
   const recsReady = recs?.key === recsKey(id, lifeEvent, recsAttempt)
   const recsData = recsReady ? recs.data : null
+  // After a What-if change the drawer shows the same option's new numbers, or closes if it's gone
+  const whyOption = recsData?.recommendations.find((r) => r.id === whyId) ?? null
 
   return (
     <main className="page">
@@ -100,7 +105,11 @@ export default function Dashboard() {
         )}
         {recsData && (
           <>
-            <RecommendationList recommendations={recsData.recommendations} considered={recsData.considered} />
+            <RecommendationList
+              recommendations={recsData.recommendations}
+              considered={recsData.considered}
+              onWhyThis={(rec) => setWhyId(rec.id)}
+            />
             {/* Anchor for the "We also considered N other options" link */}
             <div id="all-options">
               <ComparisonTable considered={recsData.considered} />
@@ -109,6 +118,7 @@ export default function Dashboard() {
         )}
         <EquityChart timeline={equity_timeline} contractType={contract.type} />
       </section>
+      <WhyDrawer option={whyOption} onClose={() => setWhyId(null)} />
     </main>
   )
 }
