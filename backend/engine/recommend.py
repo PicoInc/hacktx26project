@@ -14,11 +14,13 @@ TOP_N = 3
 def _advisor_card(profile: dict) -> dict:
     """Human handoff, pinned to #1 when the customer is short every month or nothing is affordable."""
     pay_now = profile["contract"]["monthly_payment"]
+    months = profile["contract"].get("months_remaining", 0)
     card = _option(
         kind="talk_to_advisor", title="Talk to a TFS specialist first",
         vehicle_label="", keeps_vehicle=True, monthly_payment=pay_now, current_payment=pay_now,
-        upfront_cost=0, term_months=profile["contract"].get("months_remaining", 0),
-        total_cost=0, fuel_monthly=0,
+        upfront_cost=0, term_months=months,
+        # Nothing changes until the customer talks to someone, so the cost is today's plan
+        total_cost=pay_now * months, fuel_monthly=0,
         tradeoffs=["Your monthly budget is tight right now",
                    "A specialist can review relief options with you"],
         assumptions={}, action={"kind": "follow_up", "label": "Schedule a call"},
