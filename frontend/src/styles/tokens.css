@@ -21,6 +21,11 @@
   --space-5: 40px;
   --space-6: 48px;
 
+  /* Roads from the logo: unchosen options are shoulder gray, text on asphalt is light gray */
+  --road: #333333;
+  --on-dark-muted: #bdbdbd;
+
   --radius: 8px;
-  --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Overpass descends from highway signage, which suits the road in the logo */
+  --font: 'Overpass Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }

@@ -1,4 +1,4 @@
-// Placeholder cards in the same layout as RecommendationList (#1 full width, then a row of two)
+// Placeholder cards in the same layout as RecommendationList (three horizontal cards, stacked)
 function SkeletonCard({ top }) {
   return (
     <div className={top ? 'card rec-card rec-card-top skeleton-card' : 'card rec-card skeleton-card'}>

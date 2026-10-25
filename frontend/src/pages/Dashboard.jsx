@@ -84,20 +84,25 @@ export default function Dashboard() {
     <main className="page">
       <header className="header">
         <div className="header-left">
-          <Link to="/customers" className="back-link">← Switch customer</Link>
+          <Link to="/customers" className="back-link">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15 5l-7 7 7 7" />
+            </svg>
+            Switch customer
+          </Link>
           <h1>Hi, {customer.name}</h1>
         </div>
         <EquityBadge equity={equity} />
       </header>
 
-      <div className="grid-3">
+      <div className="grid-3 snapshot">
         <VehicleCard vehicle={vehicle} />
         <ContractCard contract={contract} />
         <FinanceSnapshot finances={finances} />
       </div>
 
       <section className="section">
-        <h2>Your next move</h2>
+        <h2>Your best moves</h2>
         <WhatIfPanel value={lifeEvent} onChange={setLifeEvent} summary={recsData?.life_event_applied ?? null} />
         {!recsReady && <RecommendationSkeleton />}
         {recsReady && recs.error && (

@@ -1,4 +1,4 @@
-# 🚗 Next Move
+# 🚗 NexMove
 
 > **HackTX 2026 · Toyota Financial Services Challenge**
 
