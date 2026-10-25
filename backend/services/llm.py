@@ -6,6 +6,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from services import cache
 from services.templates import format_money, template_explanation
 
 logger = logging.getLogger(__name__)
@@ -58,12 +59,22 @@ def _option_payload(rec: dict) -> dict:
     return payload
 
 
-def _build_user_content(recommendations: list[dict], profile: dict, life_event: dict | None) -> str:
-    return json.dumps({
+def _payload(recommendations: list[dict], profile: dict, life_event: dict | None) -> dict:
+    return {
         "customer_first_name": _first_name(profile["customer"]["name"]),
         "life_event": life_event,
         "options": [_option_payload(r) for r in recommendations],
-    })
+    }
+
+
+def _build_user_content(recommendations: list[dict], profile: dict, life_event: dict | None) -> str:
+    return json.dumps(_payload(recommendations, profile, life_event))
+
+
+def explanation_key(recommendations: list[dict], profile: dict, life_event: dict | None) -> str:
+    """Cache key (NM-21): covers everything the model sees plus the prompt, so any change misses."""
+    return cache.make_key(profile["customer"]["id"], life_event,
+                          _payload(recommendations, profile, life_event), _system_prompt())
 
 
 def _model() -> str:
@@ -181,11 +192,37 @@ def validate(text: str, option: dict, extra: set[float] = frozenset()) -> bool:
     return not _unsupported_numbers(text, option, extra)
 
 
-def explain_all(recommendations: list[dict], profile: dict, life_event: dict | None) -> dict[str, dict]:
+def explain_all(recommendations: list[dict], profile: dict, life_event: dict | None,
+                use_cache: bool = True) -> dict[str, dict]:
     """One LLM call for all options. Any problem falls back to the template, per option, including
-    text that fails the number validator. Returns { option_id: { "text": str, "source": "llm" | "template" } }. Never raises."""
+    text that fails the number validator. Returns { option_id: { "text": str, "source": "llm" | "template" } }. Never raises.
+    `use_cache=False` is for scripts/warm_cache.py only: always ask the model, ignoring warmed entries."""
     out = {r["id"]: {"text": template_explanation(r), "source": "template"} for r in recommendations}
-    if not recommendations or not os.environ.get("LLM_API_KEY"):
+    if not recommendations:
+        return out
+
+    # The model also sees the life event, so its numbers ("$500 a month for the baby") are fair game
+    event_numbers = _numbers_in((life_event or {}).get("params", {}))
+
+    # NM-21: a warmed entry is served without any network call (and re-checked by the validator)
+    cached = None
+    if use_cache:
+        try:
+            cached = cache.get(explanation_key(recommendations, profile, life_event))
+        except Exception as exc:  # a cache problem must never break the endpoint
+            logger.warning("Explanation cache lookup failed: %r", exc)
+    if cached is not None:
+        for rec in recommendations:
+            entry = cached.get(rec["id"])
+            if (isinstance(entry, dict) and entry.get("source") == "llm" and isinstance(entry.get("text"), str)
+                    and entry["text"].strip() and validate(entry["text"], rec, event_numbers)):
+                out[rec["id"]] = {"text": entry["text"].strip(), "source": "llm"}
+        return out
+
+    if cache.cache_only():
+        logger.info("CACHE_ONLY is on and this combination isn't cached; using templates")
+        return out
+    if not os.environ.get("LLM_API_KEY"):
         return out
 
     try:
@@ -198,8 +235,6 @@ def explain_all(recommendations: list[dict], profile: dict, life_event: dict | N
         return out
 
     global hallucinations_caught
-    # The model also sees the life event, so its numbers ("$500 a month for the baby") are fair game
-    event_numbers = _numbers_in((life_event or {}).get("params", {}))
     for rec in recommendations:
         text = parsed.get(rec["id"])
         if not (isinstance(text, str) and text.strip()):
