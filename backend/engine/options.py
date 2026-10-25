@@ -56,6 +56,8 @@ def _lease_options(p: dict) -> list[dict]:
     fuel_now = monthly_fuel_cost(p["miles_per_year"], current["mpg"], C.FUEL_PRICE)
 
     projected = projected_end_miles(v["mileage"], c["months_elapsed"], c["months_remaining"])
+    # life event "longer_commute" (NM-17): extra miles driven over the remaining months
+    projected += round(p.get("extra_miles_per_year", 0) * c["months_remaining"] / 12)
     over_miles = max(0, projected - c["miles_allowed_total"])
     overage_fee = mileage_overage_fee(projected, c["miles_allowed_total"], C.OVERAGE_RATE_PER_MILE)
     return_cost = overage_fee + C.DISPOSITION_FEE
