@@ -1,0 +1,226 @@
+{
+  "source": "synthetic",
+  "customer": {
+    "_id": "p1",
+    "first_name": "Maya",
+    "last_name": "Lopez"
+  },
+  "accounts": [
+    {
+      "_id": "p1-checking",
+      "type": "Checking",
+      "balance": 640
+    },
+    {
+      "_id": "p1-savings",
+      "type": "Savings",
+      "balance": 2600
+    }
+  ],
+  "deposits": [
+    {
+      "amount": 1050.0,
+      "transaction_date": "2026-07-31",
+      "description": "Payroll"
+    },
+    {
+      "amount": 1050.0,
+      "transaction_date": "2026-08-14",
+      "description": "Payroll"
+    },
+    {
+      "amount": 1050.0,
+      "transaction_date": "2026-08-28",
+      "description": "Payroll"
+    },
+    {
+      "amount": 1050.0,
+      "transaction_date": "2026-09-11",
+      "description": "Payroll"
+    },
+    {
+      "amount": 1050.0,
+      "transaction_date": "2026-09-25",
+      "description": "Payroll"
+    },
+    {
+      "amount": 1050.0,
+      "transaction_date": "2026-10-09",
+      "description": "Payroll"
+    }
+  ],
+  "purchases": [
+    {
+      "amount": 81.14,
+      "purchase_date": "2026-07-29",
+      "description": "Target"
+    },
+    {
+      "amount": 62.83,
+      "purchase_date": "2026-07-31",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 44.41,
+      "purchase_date": "2026-08-02",
+      "description": "CVS"
+    },
+    {
+      "amount": 23.7,
+      "purchase_date": "2026-08-03",
+      "description": "Torchy's Tacos"
+    },
+    {
+      "amount": 89.04,
+      "purchase_date": "2026-08-05",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 14.13,
+      "purchase_date": "2026-08-10",
+      "description": "Chipotle"
+    },
+    {
+      "amount": 74.04,
+      "purchase_date": "2026-08-12",
+      "description": "Spotify"
+    },
+    {
+      "amount": 73.67,
+      "purchase_date": "2026-08-14",
+      "description": "Amazon"
+    },
+    {
+      "amount": 87.67,
+      "purchase_date": "2026-08-17",
+      "description": "Amazon"
+    },
+    {
+      "amount": 49.61,
+      "purchase_date": "2026-08-17",
+      "description": "Shell"
+    },
+    {
+      "amount": 37.04,
+      "purchase_date": "2026-08-17",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 89.48,
+      "purchase_date": "2026-08-21",
+      "description": "Chipotle"
+    },
+    {
+      "amount": 64.82,
+      "purchase_date": "2026-08-22",
+      "description": "Shell"
+    },
+    {
+      "amount": 12.38,
+      "purchase_date": "2026-08-23",
+      "description": "H-E-B"
+    },
+    {
+      "amount": 59.63,
+      "purchase_date": "2026-08-26",
+      "description": "Spotify"
+    },
+    {
+      "amount": 49.92,
+      "purchase_date": "2026-08-28",
+      "description": "Shell"
+    },
+    {
+      "amount": 8.95,
+      "purchase_date": "2026-09-05",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 51.1,
+      "purchase_date": "2026-09-06",
+      "description": "CVS"
+    },
+    {
+      "amount": 10.62,
+      "purchase_date": "2026-09-20",
+      "description": "Torchy's Tacos"
+    },
+    {
+      "amount": 32.31,
+      "purchase_date": "2026-09-21",
+      "description": "Walmart"
+    },
+    {
+      "amount": 92.33,
+      "purchase_date": "2026-09-22",
+      "description": "CVS"
+    },
+    {
+      "amount": 87.29,
+      "purchase_date": "2026-09-24",
+      "description": "Target"
+    },
+    {
+      "amount": 34.47,
+      "purchase_date": "2026-09-25",
+      "description": "Starbucks"
+    },
+    {
+      "amount": 43.68,
+      "purchase_date": "2026-09-28",
+      "description": "Target"
+    },
+    {
+      "amount": 46.62,
+      "purchase_date": "2026-10-11",
+      "description": "Chipotle"
+    },
+    {
+      "amount": 78.49,
+      "purchase_date": "2026-10-11",
+      "description": "Spotify"
+    },
+    {
+      "amount": 10.46,
+      "purchase_date": "2026-10-17",
+      "description": "Spotify"
+    },
+    {
+      "amount": 44.78,
+      "purchase_date": "2026-10-18",
+      "description": "Target"
+    },
+    {
+      "amount": 23.86,
+      "purchase_date": "2026-10-18",
+      "description": "Chipotle"
+    },
+    {
+      "amount": 81.53,
+      "purchase_date": "2026-10-20",
+      "description": "Chipotle"
+    }
+  ],
+  "bills": [
+    {
+      "payment_amount": 750,
+      "payee": "Rent",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 284.37,
+      "payee": "Toyota Financial Services",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 45,
+      "payee": "Phone",
+      "status": "recurring"
+    },
+    {
+      "payment_amount": 70,
+      "payee": "Utilities",
+      "status": "recurring"
+    }
+  ]
+}

@@ -30,7 +30,8 @@
       },
       "action": {
         "kind": "self_service",
-        "label": "Start buyout"
+        "label": "Start buyout",
+        "confirmation": "Buyout started — a TFS specialist will confirm within 1 business day"
       },
       "explanation": "Buying out your Corolla keeps your payment close to today's at $294.34/mo and avoids the $1,275 over-mileage fee. The trade-off is that repairs after the warranty are on you. You can start the buyout online.",
       "explanation_source": "template"
@@ -65,7 +66,8 @@
       },
       "action": {
         "kind": "offer",
-        "label": "See lease offer"
+        "label": "See lease offer",
+        "confirmation": "Lease offer saved — a TFS specialist will reach out within 1 business day to finalize your 2027 Corolla"
       },
       "explanation": "You'd drive a new 2027 Corolla for $324.20/mo after paying $1,160 upfront for your extra miles and the return fee. That upfront cost is the main trade-off. You can see the lease offer now.",
       "explanation_source": "template"
@@ -98,7 +100,8 @@
       },
       "action": {
         "kind": "follow_up",
-        "label": "Talk to a TFS specialist"
+        "label": "Talk to a TFS specialist",
+        "confirmation": "Request sent — a TFS specialist will call you within 1 business day"
       },
       "explanation": "Returning the car ends your $284.37 payment but costs $1,670 in fees and leaves you without a car. A specialist can walk you through it.",
       "explanation_source": "template"
@@ -135,7 +138,8 @@
       },
       "action": {
         "kind": "self_service",
-        "label": "Start buyout"
+        "label": "Start buyout",
+        "confirmation": "Buyout started — a TFS specialist will confirm within 1 business day"
       },
       "explanation": "Buying out your Corolla keeps your payment close to today's at $294.34/mo and avoids the $1,275 over-mileage fee. The trade-off is that repairs after the warranty are on you. You can start the buyout online.",
       "explanation_source": "template"
@@ -170,7 +174,8 @@
       },
       "action": {
         "kind": "offer",
-        "label": "See lease offer"
+        "label": "See lease offer",
+        "confirmation": "Lease offer saved — a TFS specialist will reach out within 1 business day to finalize your 2027 Corolla"
       },
       "explanation": "You'd drive a new 2027 Corolla for $324.20/mo after paying $1,160 upfront for your extra miles and the return fee. That upfront cost is the main trade-off. You can see the lease offer now.",
       "explanation_source": "template"
@@ -203,7 +208,8 @@
       },
       "action": {
         "kind": "follow_up",
-        "label": "Talk to a TFS specialist"
+        "label": "Talk to a TFS specialist",
+        "confirmation": "Request sent — a TFS specialist will call you within 1 business day"
       },
       "explanation": "Returning the car ends your $284.37 payment but costs $1,670 in fees and leaves you without a car. A specialist can walk you through it.",
       "explanation_source": "template"

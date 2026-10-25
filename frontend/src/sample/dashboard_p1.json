@@ -1,0 +1,41 @@
+{
+  "customer": {
+    "id": "p1",
+    "name": "Maya Lopez"
+  },
+  "goals": [
+    "keep_a_car_after_graduation"
+  ],
+  "vehicle": {
+    "year": 2023,
+    "model": "Corolla",
+    "trim": "LE",
+    "mileage": 31200,
+    "est_value": 18900
+  },
+  "contract": {
+    "type": "lease",
+    "monthly_payment": 284.37,
+    "months_remaining": 4,
+    "months_elapsed": 32,
+    "apr": 4.2,
+    "residual": 14600,
+    "payoff": 14600,
+    "miles_allowed_total": 30000,
+    "miles_projected_at_end": 35100
+  },
+  "finances": {
+    "monthly_income": 2100,
+    "monthly_bills": 1150,
+    "monthly_spending": 520,
+    "monthly_surplus": 430,
+    "savings": 2600,
+    "checking": 640,
+    "source": "mock"
+  },
+  "equity": {
+    "value": 4300,
+    "status": "positive"
+  },
+  "equity_timeline": []
+}
