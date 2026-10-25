@@ -1,8 +1,5 @@
 /* Comparison table (NM-22). Owner: Rodrigo. */
 
-.comparison summary {
-  cursor: pointer;
-}
 
 .comparison-scroll {
   overflow-x: auto;

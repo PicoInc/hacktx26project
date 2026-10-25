@@ -2,7 +2,6 @@
 import { formatCurrency, formatSignedCurrency } from '../format.js'
 import './ComparisonTable.css'
 
-// Ranked options first (#1, #2, ...), rejected ones (rank = null) at the end
 function sortByRank(options) {
   return [...options].sort((a, b) => {
     if (a.rank == null && b.rank == null) return 0
@@ -17,19 +16,19 @@ export default function ComparisonTable({ considered = [] }) {
   const options = sortByRank(considered)
 
   return (
-    <details className="card comparison">
-      <summary className="card-title">All options we considered ({options.length})</summary>
+    <section className="card comparison" aria-label="All options we considered">
+      <h3 className="card-title">All options we considered ({options.length})</h3>
 
       <div className="comparison-scroll">
         <table className="comparison-table">
           <thead>
             <tr>
-              <th scope="col">Option</th>
-              <th scope="col">Monthly</th>
-              <th scope="col">Δ vs today</th>
-              <th scope="col">Upfront</th>
-              <th scope="col">Total</th>
-              <th scope="col">Status</th>
+            <th scope="col">Option</th>
+            <th scope="col">Monthly payment</th>
+            <th scope="col">Change per month</th>
+            <th scope="col">Due upfront</th>
+            <th scope="col">Total cost</th>
+            <th scope="col">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -55,6 +54,6 @@ export default function ComparisonTable({ considered = [] }) {
           </tbody>
         </table>
       </div>
-    </details>
+    </section>
   )
 }
