@@ -29,13 +29,13 @@
       "lease_residual_pct": null
     },
     "corolla_le_2027": {
-      "label": "2027 Corolla LE",
-      "year": 2027,
-      "model": "Corolla",
-      "trim": "LE",
-      "msrp": 23500,
-      "mpg": 35,
-      "lease_residual_pct": 0.62
+    "label": "2027 Corolla LE",
+    "year": 2027,
+    "model": "Corolla",
+    "trim": "LE",
+    "msrp": 22500,
+    "mpg": 35,
+    "lease_residual_pct": 0.62
     },
     "highlander_xle_2027": {
       "label": "2027 Highlander XLE",
