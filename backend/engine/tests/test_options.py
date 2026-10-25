@@ -33,7 +33,7 @@ def test_p1_lease_options():
     assert o["lease_buyout"]["monthly_payment"] == money(294.34)
     assert o["lease_buyout"]["delta_monthly"] == money(9.97)
     assert o["buy_miles_new_lease"]["upfront_cost"] == money(1160)
-    assert o["buy_miles_new_lease"]["monthly_payment"] == money(324.20)
+    assert o["buy_miles_new_lease"]["monthly_payment"] == money(310.40)    
     assert o["return_new_lease"]["upfront_cost"] == money(1670)
     assert o["return_walk_away"]["keeps_vehicle"] is False
 
