@@ -11,7 +11,7 @@ export default function App() {
         {/* On every screen, so a human is always one click away (NM-20) */}
         <header className="app-bar">
           <Link to="/" className="wordmark">
-            Next Move
+            <img src="/nexmove-logo-mark.png" alt="NexMove" width="1186" height="271" />
           </Link>
           <HandoffButton />
         </header>
