@@ -556,7 +556,7 @@ Pass the model only the fields it needs: title, monthly_payment, delta_monthly, 
 - **Explanations may name rejected options:** the engine's `rejection_reason` text is passed through. The model repeats it kindly, so wording like "15% of your income (limit 15%)" comes from NM-11 and may need Samu to reword it.
 - **NM-14 is wired in:** `explain_all` now runs `validate` on every LLM text (see NM-14's notes). The model has made small unsupported claims (for example, "set up payment reminders"), which is why the validator and the "use only facts in the JSON" prompt rule matter.
 
-### NM-14 · Number validator + fallback `E3` `P0` · 2 pts · **Jose**
+### ✅ NM-14 · Number validator + fallback `E3` `P0` · 2 pts · **Jose**
 *As a responsible-AI feature, the LLM must never show a number we didn't compute.*
 
 **Context:** This is our strongest demo line: "Our AI literally cannot make up a number." Any LLM sentence containing a number that isn't in the engine output gets thrown away and replaced by a deterministic template.
@@ -596,6 +596,8 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 - **Prompt tweak (NM-13 file):** the model was writing "a delta monthly of +$9.97" and listing every number. `explain.txt` now forbids field names and asks for the one or two numbers that matter.
 - **Known limit:** numbers written as words ("twelve months") aren't checked. Only digits are.
 
+**Other tasks affected by NM-14 (each has a note in its own section):** NM-15 (loading and fallback timing), NM-19 (what the model can and can't quote), NM-20 (drawer copy), NM-21 (cache validated output, print the hallucination count), NM-24 (debug badge from `explanation_source`), NM-26 (the validator only understands US number formats, English-only templates, `lang` in the signature and cache key), NM-31 and NM-32 (Devpost and pitch wording).
+
 ### NM-15 · Wire frontend to live API `E4` `P0` · 2 pts · **Jose**
 *As a demo, the UI must show real engine output, not sample JSON.*
 
@@ -616,6 +618,8 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 - [ ] Loading + error states (the card skeletons replace `<RecommendationList>` in `Dashboard.jsx` while loading)
 - [ ] Remove any remaining hard-coded data from components
 - [ ] Check that the live response carries `action.confirmation` (NM-10 contract change). If it doesn't, the toast quietly falls back to generic text, so check the wording on each card
+- [ ] Timing to plan the skeletons for (NM-13/NM-14): an LLM response takes about 1 s once the server has warmed up (up to about 3.5 s on the first request after a quiet period), and the backend stops waiting after 6 s and returns template text with `explanation_source: "template"`. The request still returns 200 with all explanations filled, so the UI never needs an "explanation failed" state; it only needs the normal loading and error states for the request itself
+- [ ] The POST can be slow while the free-tier LLM quota (5 requests per minute) is exhausted, but it still succeeds with templates. Don't auto-retry on every What-if click or you'll burn the quota; NM-21's cache removes the problem for the demo
 
 **Acceptance criteria:**
 - [ ] p1 flows picker → dashboard → live cards with LLM explanations
@@ -719,6 +723,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - Banner above the cards with `life_event_applied` ("Income down 20% → monthly surplus now −$340")
 - Changed-rank indicator: when a life event is applied, `recommend()` adds `previous_rank` (baseline rank, or `null` if new) to each recommendation; Jose's card renders "↑ was #2" / "New" from it (one line on his side, in the `rec-head` row of `RecommendationCard.jsx`; tell him when the field lands)
 - Finance snapshot reflects the event: `recommend()` returns `finances_after_event`; Jose's `FinanceSnapshot` shows it when present
+
+**From NM-13 / NM-14:** each What-if change calls the LLM again (about 1 s, or instant once NM-21's cache has that combination). The explanation model only sees the event's `type` and `params`, not `life_event_applied` or `finances_after_event`, so card text can mention "your new baby" or the event's own numbers (for example, an income drop of 20%) but can't quote the new surplus; that number belongs in your banner. Any number the model writes that isn't in the option or the event params is replaced by the template. The slider's debounce also protects the free-tier limit of 5 requests per minute.
 
 **Tasks:**
 - [ ] Chips + slider + reset
@@ -837,6 +843,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - [ ] Favicon, page titles, a nice persona-picker header
 - [ ] Check at 1280×800 and on the projector resolution (1920×1080)
 - [ ] Remove console errors and warnings
+- [ ] Debug badge: with `?debug=1` in the URL, show a tiny "AI" / "template" badge on each card from `explanation_source` (promised in NM-14's spec; the field is already in the API response and `RecommendationCard.jsx` doesn't render it yet). Handy for rehearsals to see which cards fell back (timeout, rate limit or a rejected number)
 
 **Acceptance criteria:**
 - [ ] No console errors on the full demo path
@@ -871,6 +878,13 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - EN/ES toggle in the header; UI strings in a simple dictionary
 - `?lang=es` passed to the recommendations endpoint → the LLM explains in Spanish (numbers unchanged; the validator still applies, using Spanish number formats)
 - Warm the cache for `es` as well
+
+**From NM-13 / NM-14 (what you need to change in the explanation pipeline):**
+- **Number format:** the validator (`extract_numbers` in `backend/services/llm.py`) only understands US formatting: `1,275.50`, `$294.34`, `6.9%`. It misreads European-style numbers (`1.275,00` is read as 1.275, 0 and so on), so those explanations would be rejected and fall back to templates. The simplest fix is in the prompt: tell the model to copy every number exactly as given in the JSON (`$1,275`, `294.34`), which is also standard in US Spanish. Only if you want true Spanish formatting, extend `extract_numbers` and its tests in `test_validator.py`.
+- **Fallback language:** `templates.template_explanation` produces English only, so a failed or rejected Spanish explanation would show English. Add a Spanish variant keyed by `lang`.
+- **Signature and route:** `explain_all(recommendations, profile, life_event)` has no language yet. Add a `lang` parameter (default `"en"`), load a Spanish prompt (a second file next to `explain.txt`), and have `routes.py` (Rodrigo) read `?lang=` and pass it through.
+- **Cache:** include `lang` in NM-21's cache key, or Spanish and English entries will overwrite each other.
+- **Words vs digits:** the validator ignores numbers spelled out as words ("mil doscientos"). Tell the model to write digits.
 
 **Acceptance criteria:**
 - [ ] The full demo path works in Spanish with cached explanations
