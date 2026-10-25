@@ -81,7 +81,17 @@ def recommend(profile: dict, life_event: dict | None = None) -> dict:
     for o in result["considered"]:
         o["previous_rank"] = before_ranks.get(o["id"])
     result.update(
-        life_event_applied=describe_life_event(profile, changed, life_event),
+        life_event_applied=_with_lost_options(describe_life_event(profile, changed, life_event), result),
         finances_after_event=changed["finances"],
     )
     return result
+
+
+def _with_lost_options(summary: str, result: dict) -> str:
+    """Add the options the event made unaffordable, so the banner says what changed, not just the surplus.
+
+    e.g. 'Baby on the way (+$500/mo) → monthly surplus now $400 · No longer affordable: Trade in for a ...'
+    """
+    lost = [o["title"] for o in result["considered"]
+            if o["previous_rank"] is not None and not o["affordable"]]
+    return f"{summary} · No longer affordable: {', '.join(lost)}" if lost else summary
