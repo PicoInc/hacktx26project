@@ -1,5 +1,4 @@
 """Equity timeline for the chart. Owner: Rodrigo. Story: NM-23."""
-"""Equity timeline for the chart. Owner: Rodrigo. Story: NM-23."""
 from engine.constants import DEPRECIATION_PER_YEAR
 from engine.finance import loan_balance
 
