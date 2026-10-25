@@ -1,4 +1,7 @@
 """Shared engine assumptions. All values are SYNTHETIC demo assumptions. Owner: Samu (NM-4)."""
+import json
+from pathlib import Path
+
 
 # Lease
 OVERAGE_RATE_PER_MILE = 0.25
@@ -27,11 +30,7 @@ SURPLUS_SHARE_MAX = 0.50
 MIN_BUFFER_MONTHS = 1
 RELIEF_SURPLUS_MIN = 0
 
-VEHICLE_CATALOG = {
-    "corolla_le_2023":      {"label": "2023 Corolla LE",      "msrp": None,  "mpg": 35, "lease_residual_pct": None},
-    "corolla_le_2027":      {"label": "2027 Corolla LE",      "msrp": 23500, "mpg": 35, "lease_residual_pct": 0.62},
-    "rav4_xle_2022":        {"label": "2022 RAV4 XLE",        "msrp": None,  "mpg": 30, "lease_residual_pct": None},
-    "highlander_xle_2027":  {"label": "2027 Highlander XLE",  "msrp": 45500, "mpg": 25, "lease_residual_pct": 0.58},
-    "camry_se_2021":        {"label": "2021 Camry SE",        "msrp": None,  "mpg": 32, "lease_residual_pct": None},
-    "camry_hybrid_se_2027": {"label": "2027 Camry Hybrid SE", "msrp": 32500, "mpg": 51, "lease_residual_pct": 0.60},
-}
+   # Vehicle catalog: loaded from backend/data/vehicle_catalog.json (single source of truth)
+_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+with open(_DATA_DIR / "vehicle_catalog.json") as _file:
+    VEHICLE_CATALOG = json.load(_file)["vehicles"]
