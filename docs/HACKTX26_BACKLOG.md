@@ -646,7 +646,7 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 
 **Other tasks affected by NM-14 (each has a note in its own section):** NM-15 (loading and fallback timing), NM-19 (what the model can and can't quote), NM-20 (drawer copy), NM-21 (cache validated output, print the hallucination count), NM-24 (debug badge from `explanation_source`), NM-26 (the validator only understands US number formats, English-only templates, `lang` in the signature and cache key), NM-31 and NM-32 (Devpost and pitch wording).
 
-### NM-15 · Wire frontend to live API `E4` `P0` · 2 pts · **Jose**
+### ✅ NM-15 · Wire frontend to live API `E4` `P0` · 2 pts · **Jose**
 *As a demo, the UI must show real engine output, not sample JSON.*
 
 **Context:** This is the integration moment for Milestone M2. After this, everything on screen comes from the backend.
@@ -671,8 +671,8 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 - [x] The live API returns **2** cards for p1 (see NM-11), and the dashboard includes `equity_timeline` (NM-23) plus extra keys `miles_per_year`, `vehicle_targets`, `vehicle.catalog_id` (NM-8), which the UI can ignore
 
 **Acceptance criteria:**
-- [ ] p1 flows picker → dashboard → live cards with LLM explanations
-- [ ] Stopping Flask shows the error state, not a blank page
+- [x] p1 flows picker → dashboard → live cards with LLM explanations
+- [x] Stopping Flask shows the error state, not a blank page
 
 **How to verify:** run both servers, click through p1, then kill Flask and reload.
 
