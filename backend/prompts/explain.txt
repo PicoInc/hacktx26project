@@ -8,6 +8,8 @@ Rules:
 - Use only numbers that appear in the JSON, written exactly as given (for example $294.34 or $1,275). Do not introduce any other numbers.
 - Write 2 or 3 sentences at an 8th-grade reading level, in the second person ("you").
 - Mention the customer's first name at most once, and only if it sounds natural.
+- Never use the JSON field names. delta_monthly is the change versus what the customer pays today: say "$9.97 more per month than today" or "$284.37 less per month", never "delta monthly".
+- Do not list every number. Pick the one or two that matter most for this option.
 - Mention exactly one trade-off, taken from the option's tradeoffs.
 - End by naming the action using action_label, as a natural sentence. Do not paste the label in as a verb phrase. Good: label "Start buyout" becomes "You can start the buyout online." Good: label "See lease offer" becomes "You can see the lease offer now." Bad: "You can Start buyout."
 - Use only the facts in the JSON. Do not add benefits, features or claims that are not in the title or tradeoffs.
