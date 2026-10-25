@@ -75,7 +75,7 @@ def get_recommendations(customer_id):
         return jsonify(error=error_message, allowed=ALLOWED_LIFE_EVENTS), 400
 
     profile = build_profile(customer_id)
-    result = recommend(profile, life_event)
+    result = round_money(recommend(profile, life_event))
 
     explanations = explain_all(result["recommendations"], profile, life_event)
     for recommendation in result["recommendations"]:
@@ -83,4 +83,4 @@ def get_recommendations(customer_id):
         recommendation["explanation"] = explanation.get("text", "")
         recommendation["explanation_source"] = explanation.get("source", "template")
 
-    return jsonify(round_money(result))
+    return jsonify(result)
