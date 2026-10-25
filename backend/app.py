@@ -13,6 +13,10 @@ def create_app():
     from routes import api
     app.register_blueprint(api, url_prefix="/api")
 
+    # Open the LLM connection in the background so the first request is fast (NM-13, Jose)
+    from services.llm import warm_up
+    warm_up()
+
     @app.get("/api/health")
     def health():
         return jsonify(status="ok")

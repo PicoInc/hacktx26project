@@ -11,11 +11,13 @@ logger = logging.getLogger(__name__)
 
 TIMEOUT_S = 6            # how long a customer waits before we show the template
 HTTP_TIMEOUT_MS = 10000  # SDK ceiling; the Gemini API rejects deadlines under 10 s
-DEFAULT_MODEL = "gemini-3.8-flash"
+DEFAULT_MODEL = "gemini-3.5-flash-lite"
 PROMPT_PATH = Path(__file__).resolve().parent.parent / "prompts" / "explain.txt"
 
 _client = None
-_pool = ThreadPoolExecutor(max_workers=2)
+_warm_future = None
+# Room for a warm-up plus timed-out requests still finishing in the background
+_pool = ThreadPoolExecutor(max_workers=4)
 
 
 def _system_prompt() -> str:
@@ -63,8 +65,12 @@ def _build_user_content(recommendations: list[dict], profile: dict, life_event: 
     })
 
 
-def _call_llm(system: str, user: str) -> str:
-    """One Gemini call that returns JSON text. Raises on a missing key, timeout or API error."""
+def _model() -> str:
+    return os.environ.get("LLM_MODEL", DEFAULT_MODEL)
+
+
+def _get_client():
+    """One shared client, so every request reuses the same open connection."""
     global _client
     from google import genai
     from google.genai import types
@@ -74,18 +80,44 @@ def _call_llm(system: str, user: str) -> str:
             api_key=os.environ["LLM_API_KEY"],
             http_options=types.HttpOptions(timeout=HTTP_TIMEOUT_MS),
         )
-    response = _client.models.generate_content(
-        model=os.environ.get("LLM_MODEL", DEFAULT_MODEL),
+    return _client
+
+
+def _call_llm(system: str, user: str) -> str:
+    """One Gemini call that returns JSON text. Raises on a missing key, timeout or API error."""
+    from google.genai import types
+
+    response = _get_client().models.generate_content(
+        model=_model(),
         contents=user,
         config=types.GenerateContentConfig(
             system_instruction=system,
             response_mime_type="application/json",
             temperature=0.3,
-            # No hidden "thinking" time: keeps Flash comfortably under the 6 s timeout
-            thinking_config=types.ThinkingConfig(thinking_budget=0),
+            # Minimal hidden reasoning: ~1 s instead of ~4 s on flash-lite
+            thinking_config=types.ThinkingConfig(thinking_level="minimal"),
         ),
     )
     return response.text
+
+
+def _warm_up():
+    try:
+        _get_client().models.get(model=_model())
+        logger.info("LLM connection warmed up (%s)", _model())
+    except Exception as exc:
+        logger.warning("LLM warm-up failed (requests will still work or fall back): %r", exc)
+
+
+def warm_up():
+    """Called once when Flask starts: opens the TLS connection and checks the key/model in the
+    background, so the first customer doesn't pay for it. Uses models.get, not generate_content,
+    so it doesn't count against the per-minute generation quota. Runs at most once per process;
+    returns its Future, or None without a key."""
+    global _warm_future
+    if _warm_future is None and os.environ.get("LLM_API_KEY"):
+        _warm_future = _pool.submit(_warm_up)
+    return _warm_future
 
 
 def _call_with_deadline(system: str, user: str) -> str:

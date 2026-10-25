@@ -114,6 +114,35 @@ def test_payload_only_has_allowed_fields_and_formatted_money(monkeypatch, recs):
     assert rejected["rejection_reason"]
 
 
+def test_warm_up_uses_models_get_not_generate(monkeypatch):
+    class FakeModels:
+        def __init__(self):
+            self.got, self.generated = [], []
+
+        def get(self, model):
+            self.got.append(model)
+
+        def generate_content(self, **kw):
+            self.generated.append(kw)
+
+    class FakeClient:
+        models = FakeModels()
+
+    monkeypatch.setattr(llm, "_get_client", lambda: FakeClient)
+    monkeypatch.setattr(llm, "_warm_future", None)
+    llm.warm_up().result(timeout=2)
+    llm.warm_up()  # second call (e.g. Flask's reloader) must not warm up again
+    assert FakeClient.models.got == [llm._model()]
+    assert FakeClient.models.generated == []
+
+
+def test_warm_up_without_key_does_nothing(monkeypatch):
+    monkeypatch.delenv("LLM_API_KEY")
+    monkeypatch.setattr(llm, "_get_client", lambda: pytest.fail("client should not be created"))
+    monkeypatch.setattr(llm, "_warm_future", None)
+    assert llm.warm_up() is None
+
+
 def test_system_prompt_strips_comment_header():
     prompt = llm._system_prompt()
     assert prompt and not any(line.startswith("#") for line in prompt.splitlines())
