@@ -554,7 +554,7 @@ Pass the model only the fields it needs: title, monthly_payment, delta_monthly, 
 - **What the model sees:** only `id, title, monthly_payment, delta_monthly, upfront_cost, total_cost, tradeoffs, action_label` (plus `rejection_reason` when set), the customer's first name and the raw `life_event`. Money is **pre-formatted strings** (`$294.34`, `$1,160`, `+$9.97`) from `templates.format_money`, so the model copies numbers instead of formatting them.
 - **Fallback is per option:** a missing id, a non-string value, bad JSON, a missing key or any exception leaves that option on `template_explanation` with `source: "template"`.
 - **Explanations may name rejected options:** the engine's `rejection_reason` text is passed through. The model repeats it kindly, so wording like "15% of your income (limit 15%)" comes from NM-11 and may need Samu to reword it.
-- **Hook for NM-14:** a `# NM-14` comment in `explain_all` marks where `validate(text, rec)` goes. The model has made small unsupported claims (for example, "set up payment reminders"), which is why the validator and the "use only facts in the JSON" prompt rule matter.
+- **NM-14 is wired in:** `explain_all` now runs `validate` on every LLM text (see NM-14's notes). The model has made small unsupported claims (for example, "set up payment reminders"), which is why the validator and the "use only facts in the JSON" prompt rule matter.
 
 ### NM-14 · Number validator + fallback `E3` `P0` · 2 pts · **Jose**
 *As a responsible-AI feature, the LLM must never show a number we didn't compute.*
@@ -577,16 +577,24 @@ Return `explanation_source: "llm" | "template"` on each recommendation (the UI c
 **Already done in NM-13:** `template_explanation` and `format_money` live in `backend/services/templates.py` and are tested in `backend/tests/test_llm.py`. `explain_all` has a `# NM-14` comment where `validate(text, rec)` goes: reject the text and keep the template when it returns False. The LLM is given money as formatted strings (`$1,275`, `$294.34`, `+$9.97`), so `allowed_numbers` must accept those forms as well as the raw numbers.
 
 **Tasks:**
-- [ ] Validator (the template is done in NM-13)
-- [ ] Tests, including a deliberately bad string ("only $199/mo at 2.9%") that must fail
-- [ ] Log rejections (useful for the pitch: "we caught N hallucinations during testing")
+- [x] Validator (the template is done in NM-13)
+- [x] Tests, including a deliberately bad string ("only $199/mo at 2.9%") that must fail
+- [x] Log rejections (useful for the pitch: "we caught N hallucinations during testing")
 
 **Acceptance criteria:**
-- [ ] Bad string → rejected → template used
-- [ ] Good LLM output → kept
-- [ ] Endpoint never returns an empty explanation
+- [x] Bad string → rejected → template used
+- [x] Good LLM output → kept *(live Gemini output for p1 and p2 + `new_baby` through the real endpoint: all kept, 0 false rejections)*
+- [x] Endpoint never returns an empty explanation *(Flask test-client tests with a hallucinating and a crashing LLM)*
 
 **How to verify:** `pytest backend/tests/test_validator.py -v`
+
+**What changed / what to know (read this if you build on NM-14):**
+- **Where it lives:** the "Number validator" section of `backend/services/llm.py`: `extract_numbers`, `allowed_numbers` and `validate`. `explain_all` runs `validate` on every LLM text, and a failing option keeps its template (`source: "template"`); the other options keep their LLM text.
+- **What counts as allowed:** every number in the **full** option, not just the fields sent to the model. That includes numbers written inside strings (`tradeoffs`, `title` such as "2027 Corolla", `vehicle_label`, `rejection_reason`, `assumptions`). Each is accepted raw, at 2 decimals and as a whole number ($294.34 may be said as "$294"), and signs are ignored ("$284.37 less" is fine). Small integers 1–3 are ignored, as specified.
+- **Spec addition:** `validate(text, option, extra=frozenset())`. `explain_all` passes the life event's `params` numbers as `extra`, because the model is shown the life event, so "the extra $500 a month for the baby" is legitimate. Default params (an empty `{}`) add nothing.
+- **Logging for the pitch:** each rejection logs a `WARNING` from `services.llm`: "Validator rejected LLM text for <id> (numbers not from the engine: [...]) ... Caught N so far", with the rejected text. The running count is `services.llm.hallucinations_caught`, reset when the server restarts. To get "we caught N during testing", grep the Flask log for `Validator rejected`, or print the counter after `warm_cache.py` (NM-21).
+- **Prompt tweak (NM-13 file):** the model was writing "a delta monthly of +$9.97" and listing every number. `explain.txt` now forbids field names and asks for the one or two numbers that matter.
+- **Known limit:** numbers written as words ("twelve months") aren't checked. Only digits are.
 
 ### NM-15 · Wire frontend to live API `E4` `P0` · 2 pts · **Jose**
 *As a demo, the UI must show real engine output, not sample JSON.*
@@ -744,6 +752,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 
 **Already in place from NM-10:** every card's "Why this?" button calls `onWhyThis(rec)` with the full option (`explanation`, `assumptions`, numbers). Hold the selected option in `Dashboard.jsx` and pass `onWhyThis` to `<RecommendationList>`. For the handoff's confirmation toast, reuse `components/Toast.jsx` (`message`, `onDismiss`).
 
+**From NM-14:** the "AI cannot change numbers" line is now literally true. Every LLM sentence is checked by `services.llm.validate`, and any number not in the engine output swaps the text for the template. The drawer can show `explanation_source` honestly: "Explained by AI · numbers checked" for `"llm"`, "Standard explanation" for `"template"`.
+
 **Tasks:**
 - [ ] Drawer component
 - [ ] Handoff button + modal
@@ -767,6 +777,8 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - `CACHE_ONLY=true` env var: never call the LLM, read the cache only (template if missing)
 
 **From NM-13:** the cache stores exactly what `llm.explain_all` returns (`{ option_id: { text, source } }`). `llm._call_llm` is the single function that talks to Gemini, so `CACHE_ONLY` should skip `explain_all`'s LLM call entirely. The free tier allows 5 requests per minute, so `warm_cache.py` must pause between calls (about 15 s), and it should skip writing entries whose `source` is `"template"` (a rate-limit or timeout fallback), so a bad run never gets cached.
+
+**From NM-14:** cache the output of `explain_all`, never raw model text. It has already been through the number validator, so cached explanations are validated ones. A cached `"template"` entry may also mean the validator rejected the LLM text (see the `Validator rejected` log line), which is another reason to retry it rather than cache it. At the end of `warm_cache.py`, print `services.llm.hallucinations_caught`. That's the "we caught N hallucinations" number for the pitch (NM-32).
 
 **Tasks:**
 - [ ] Disk cache read/write
@@ -926,7 +938,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - [ ] **Inspiration:** customers face lease-end and payment decisions alone and default to calling support
 - [ ] **What it does:** personas, ranked recommendations, What-if, equity, human handoff
 - [ ] **How we built it:** React + Recharts, Flask, a deterministic finance engine with tests, LLM explanations behind a number validator, synthetic TFS data + Nessie-shaped banking data
-- [ ] **Challenges:** Nessie downtime → adapter pattern; keeping the AI from inventing numbers
+- [ ] **Challenges:** Nessie downtime → adapter pattern; keeping the AI from inventing numbers (NM-14: every number in an LLM sentence must appear in the engine's output for that option, or the sentence is replaced by a template; quote the `hallucinations_caught` count from NM-21's warm run)
 - [ ] **What's next:** real TFS data, credit pre-qualification, push alerts when equity turns positive
 - [ ] **Built with** tags; screenshots of every screen; video link; public repo
 - [ ] Tracks: Toyota (+ Capital One if NM-25 is done, + Gemini MLH prize if used)
@@ -941,6 +953,7 @@ def apply_life_event(profile: dict, event: dict) -> dict   # returns a NEW profi
 - [ ] 5-slide deck (**Samu leads**, everyone reviews): Problem · Demo · Responsible AI (engine decides, AI explains, validator) · Business value (retention, upgrade revenue, fewer calls) · Team
 - [ ] Each person rehearses the 2-minute pitch once out loud
 - [ ] Prepare answers: "Where does the data come from?", "What if the LLM is wrong?", "How would TFS deploy this?", "Why these affordability thresholds?"
+  - *"What if the LLM is wrong?"* (NM-14): the LLM never computes. It gets pre-calculated, pre-formatted numbers, and a validator checks every digit it writes against the engine's output. One unknown number means that card shows a deterministic template instead. Live demo: `pytest backend/tests/test_validator.py -v` shows "only $199/mo at 2.9%" being rejected. Limit to admit if asked: numbers spelled out as words aren't checked
 - [ ] Laptop setup for judging: charger, `CACHE_ONLY=true`, browser zoom tested, tabs pre-opened
 
 **Acceptance criteria:**
