@@ -31,30 +31,6 @@ const ASSUMPTIONS = {
 
 const humanize = (key) => key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ')
 
-const LOAN = 'Monthly payment = standard loan payment: P = r × PV ÷ (1 − (1 + r)^−n), where r = APR ÷ 12, PV = amount financed and n = term in months.'
-const LEASE = 'Monthly payment = depreciation + finance charge: (cap cost − residual) ÷ n + (cap cost + residual) × money factor.'
-
-// "How we calculated this", by option kind (static text from the plan, §5)
-const HOW = {
-  lease_buyout: `${LOAN} The amount financed is the residual plus the purchase option fee.`,
-  refinance: `${LOAN} The amount financed is today's payoff at the new APR.`,
-  trade_in_upgrade: `${LOAN} The amount financed is the new car's price minus your equity.`,
-  extend_term: `${LOAN} Your payoff is spread over the remaining months plus the extension.`,
-  return_new_lease: `${LEASE} Upfront = over-mileage fee + disposition fee.`,
-  buy_miles_new_lease: `${LEASE} Upfront = prepaid extra miles + disposition fee.`,
-  return_walk_away: 'No new payment. Upfront = over-mileage fee + disposition fee.',
-  keep: 'Your current payment, unchanged, until the loan is paid off.',
-  payment_deferral: '$0 for the deferred months, then your current payment; the skipped months are added to the end. It is ranked on its average monthly cost over the first year.',
-  talk_to_advisor: 'Nothing is calculated here: a specialist reviews your situation with you.',
-  recall_service: 'Nothing to pay: safety recall repairs are free at any Toyota dealer.',
-}
-
-// Kinds where the payment + fuel + upfront line doesn't apply (deferral averages its first year)
-const NO_EFFECTIVE_LINE = new Set(['payment_deferral', 'talk_to_advisor', 'recall_service'])
-
-// Live options carry `kind`; the hand-written sample JSON only has the id ("kind:target")
-const kindOf = (option) => option.kind ?? option.id.split(':')[0]
-
 function Assumptions({ assumptions = {} }) {
   const entries = Object.entries(assumptions)
   if (entries.every(([key]) => key === 'source')) {
@@ -68,22 +44,6 @@ function Assumptions({ assumptions = {} }) {
         return <Stat key={key} label={spec?.label ?? humanize(key)} value={shown} />
       })}
     </dl>
-  )
-}
-
-function Calculation({ option }) {
-  const kind = kindOf(option)
-  const showEffective = !NO_EFFECTIVE_LINE.has(kind)
-  return (
-    <>
-      {HOW[kind] && <p>{HOW[kind]}</p>}
-      {showEffective && (
-        <p className="calc-line">
-          Effective monthly = {formatCurrency(option.monthly_payment)} payment + {formatCurrency(option.fuel_monthly)} fuel
-          + {formatCurrency(option.upfront_cost)} upfront ÷ 12 = <strong>{formatCurrency(option.effective_monthly)}</strong>
-        </p>
-      )}
-    </>
   )
 }
 
@@ -116,11 +76,6 @@ export default function WhyDrawer({ option, onClose }) {
           <section className="drawer-section">
             <h3>What we assumed</h3>
             <Assumptions assumptions={option.assumptions} />
-          </section>
-
-          <section className="drawer-section">
-            <h3>How we calculated this</h3>
-            <Calculation option={option} />
           </section>
 
           <p className="drawer-footer">Calculated by our finance engine · explained by AI · AI cannot change numbers</p>

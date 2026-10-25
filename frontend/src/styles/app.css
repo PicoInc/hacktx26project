@@ -422,7 +422,6 @@ dialog.modal {
 }
 .drawer-section p { margin: 0 0 var(--space-1); line-height: 1.5; }
 .drawer-source { font-size: 13px; color: var(--color-muted); }
-.calc-line { padding: var(--space-1); border-radius: 4px; background: var(--color-gray); font-variant-numeric: tabular-nums; }
 .drawer-footer {
   margin: var(--space-1) 0 0;
   padding: var(--space-2);
