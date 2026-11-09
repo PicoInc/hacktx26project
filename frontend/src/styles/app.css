@@ -144,11 +144,12 @@ a { color: inherit; }
 .mileage-track {
   position: relative;
   height: var(--space-1);
-  background: var(--color-gray);
+  background: var(--color-border);
   border-radius: 999px;
   overflow: hidden;
 }
-.mileage-fill { height: 100%; background: var(--color-ink); border-radius: 999px; }
+/* Within the limit is good news (Cavalry Blue); over it turns red */
+.mileage-fill { height: 100%; background: var(--color-blue); border-radius: 999px; }
 .mileage-over .mileage-fill { background: var(--color-red); }
 .mileage-over .mileage-label strong { color: var(--color-red); }
 .mileage-limit {
@@ -194,7 +195,7 @@ a { color: inherit; }
 .rec-card-top .link-button:hover { color: var(--color-white); }
 .rec-card-top .link-button:focus-visible,
 .rec-card-top .btn:focus-visible { outline-color: var(--color-white); }
-.rec-card-top .rec-stats { border-top-color: #3d3d3d; }
+.rec-card-top .rec-stats { border-top-color: var(--on-dark-rule); }
 .rec-card-top .btn-dark { background: var(--color-white); color: var(--color-ink); }
 .rec-card-top .btn-outline { color: var(--color-white); border-color: var(--color-white); }
 
@@ -259,6 +260,8 @@ a { color: inherit; }
 }
 .btn:hover { opacity: 0.85; }
 .btn-primary { background: var(--color-red); color: var(--color-white); }
+/* Deepens to Supersonic Red instead of fading */
+.btn-primary:hover { opacity: 1; background: var(--color-red-deep); }
 .btn-dark { background: var(--color-ink); color: var(--color-white); }
 .btn-outline { background: transparent; color: var(--color-ink); border-color: var(--color-ink); }
 /* "Why this?": a soft filled button, so it never competes with the action's red, black or outline style */
@@ -279,7 +282,7 @@ a { color: inherit; }
   stroke-width: 2;
   stroke-linecap: round;
 }
-.rec-card-top .btn-why { background: #333333; border-color: #333333; color: var(--color-white); }
+.rec-card-top .btn-why { background: var(--road); border-color: var(--road); color: var(--color-white); }
 .rec-card-top .btn-why:hover { border-color: var(--color-white); }
 .link-button {
   padding: 0;
@@ -358,7 +361,8 @@ a { color: inherit; }
 .persona-name { margin: 0; font-size: 26px; font-weight: 800; line-height: 1.15; }
 .persona-vehicle { display: block; font-weight: 700; }
 .persona-tagline { display: block; color: var(--color-muted); }
-.persona-cta { font-weight: 700; color: var(--color-red); white-space: nowrap; }
+/* Supersonic Red: Toyota red is too light for small text on Ice Cap */
+.persona-cta { font-weight: 700; color: var(--color-red-deep); white-space: nowrap; }
 @media (max-width: 700px) {
   .persona-row {
     grid-template-columns: 10px minmax(0, 1fr);
