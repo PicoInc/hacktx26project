@@ -1,17 +1,43 @@
 :root {
-  /* Toyota-ish palette */
-  --color-red: #EB0A1E;
-  --color-ink: #1A1A1A;
-  --color-white: #FFFFFF;
-  --color-gray: #F2F2F2;
-  --color-muted: #6B6B6B;
-  --color-border: #E0E0E0;
-  --color-positive: #1E8E3E;
-  --color-positive-bg: #E6F4EA;
+  /* Toyota paint palette. Each value is a flat stand-in for the named factory color. */
+
+  /* Whites and silvers: surfaces and rules */
+  --color-white: #FFFFFF;      /* Super White 040: cards */
+  --color-gray: #EDF0F2;       /* Ice Cap: page background */
+  --color-border: #D2D7DB;     /* Classic Silver Metallic: rules and outlines */
+
+  /* Grays and blacks: text and asphalt */
+  --color-ink: #1C2127;        /* Attitude Black Metallic */
+  --color-muted: #565D65;      /* Magnetic Gray Metallic: secondary text */
+  --road: #3D4247;             /* Underground: roads not taken */
+
+  /* Reds: the brand, and the move we recommend */
+  --color-red: #EB0A1E;        /* Toyota red, as in the logo */
+  --color-red-deep: #B80A1B;   /* Supersonic Red: hover and pressed */
+
+  /* Specialty shades: meaning, not decoration */
+  --color-blue: #2D5D8C;       /* Cavalry Blue: good news (equity, savings) */
+  --color-blue-bg: #E1EAF3;
+  --color-heritage: #6D9BB1;   /* Heritage Blue: equity area in the chart */
+  --color-heritage-bg: #DCE8EE;
+  --color-honey: #F2A81D;      /* Hot Honey: caution and blocked options */
+  --color-honey-ink: #7A4D00;  /* Hot Honey dark enough for text */
+  --color-honey-bg: #FCEFD2;
+
+  /* Semantic roles */
+  --color-positive: var(--color-blue);
+  --color-positive-bg: var(--color-blue-bg);
   --color-negative: var(--color-red);
-  --color-negative-bg: #FDE7E9;
-  --color-warning: #B26A00;
-  --color-warning-bg: #FFF4E5;
+  --color-negative-bg: #FCE5E7;
+  --color-warning: var(--color-honey-ink);
+  --color-warning-bg: var(--color-honey-bg);
+
+  /* On Attitude Black */
+  --on-dark-muted: #B8BEC5;
+  --on-dark-rule: #3A4047;
+  --on-dark-chip: #5C636B;
+  /* On Cavalry Blue */
+  --on-blue-muted: #D3DEEA;
 
   /* 8px spacing grid */
   --space-1: 8px;
@@ -20,10 +46,6 @@
   --space-4: 32px;
   --space-5: 40px;
   --space-6: 48px;
-
-  /* Roads from the logo: unchosen options are shoulder gray, text on asphalt is light gray */
-  --road: #333333;
-  --on-dark-muted: #bdbdbd;
 
   --radius: 8px;
   /* Overpass descends from highway signage, which suits the road in the logo */

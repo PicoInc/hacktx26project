@@ -14,10 +14,10 @@ import { formatCurrency } from '../format.js'
 import './EquityChart.css'
 
 // Same colors as tokens.css (SVG lines need plain color values)
-const VALUE_COLOR = '#1E8E3E'   // --color-positive
-const EQUITY_FILL = '#E6F4EA'   // --color-positive-bg
-const PAYOFF_COLOR = '#1A1A1A'  // near-black
-const TODAY_COLOR = '#EB0A1E'   // Toyota red
+const VALUE_COLOR = '#2D5D8C'   // --color-blue (Cavalry Blue)
+const EQUITY_FILL = '#DCE8EE'   // --color-heritage-bg (Heritage Blue)
+const PAYOFF_COLOR = '#1C2127'  // --color-ink (Attitude Black)
+const TODAY_COLOR = '#EB0A1E'   // --color-red (Toyota red)
 
 function monthLabel(month) {
   return month === 0 ? 'Today' : `In ${month} months`
@@ -35,7 +35,7 @@ export default function EquityChart({ timeline = [], contractType }) {
     <section className="card equity-chart" aria-label="Car value compared to what you owe over time">
       <h3 className="card-title">Your car's value vs. what you owe</h3>
       <p className="muted equity-chart-note">
-        The green area is your equity: how much your car is worth beyond what you owe.
+        The shaded blue area is your equity: how much your car is worth beyond what you owe.
       </p>
 
       <ResponsiveContainer width="100%" height={280}>
